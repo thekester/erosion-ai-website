@@ -1,0 +1,152 @@
+{
+  "sites": [
+    {
+      "sitename": "NARRA",
+      "mp4": "mp4/NARRA_animation_shorelines.mp4"
+    },
+    {
+      "sitename": "Dunkerque",
+      "mp4": "mp4/Dunkerque_animation_shorelines.mp4"
+    },
+    {
+      "sitename": "DUNKERQUEPORT",
+      "mp4": "mp4/DUNKERQUEPORT_animation_shorelines.mp4"
+    },
+    {
+      "sitename": "HEMMESDEMARCK",
+      "mp4": "mp4/HEMMESDEMARCK_animation_shorelines.mp4"
+    },
+    {
+      "sitename": "CALAIS",
+      "mp4": "mp4/CALAIS_animation_shorelines.mp4"
+    },
+    {
+      "sitename": "HAVRE",
+      "mp4": "mp4/HAVRE_animation_shorelines.mp4"
+    },
+    {
+      "sitename": "BoulogneSurMer",
+      "mp4": "mp4/BoulogneSurMer_animation_shorelines.mp4"
+    },
+    {
+      "sitename": "Dieppe",
+      "mp4": "mp4/Dieppe_animation_shorelines.mp4"
+    },
+    {
+      "sitename": "Ouistreham",
+      "mp4": "mp4/Ouistreham_animation_shorelines.mp4"
+    },
+    {
+      "sitename": "Cherbourg",
+      "mp4": "mp4/Cherbourg_animation_shorelines.mp4"
+    },
+    {
+      "sitename": "DIELETTE",
+      "mp4": "mp4/DIELETTE_animation_shorelines.mp4"
+    },
+    {
+      "sitename": "SAINTMALO",
+      "mp4": "mp4/SAINTMALO_animation_shorelines.mp4"
+    },
+    {
+      "sitename": "SaintQuayPortrieux",
+      "mp4": "mp4/SaintQuayPortrieux_animation_shorelines.mp4"
+    },
+    {
+      "sitename": "Roscoff",
+      "mp4": "mp4/Roscoff_animation_shorelines.mp4"
+    },
+    {
+      "sitename": "LeConquet",
+      "mp4": "mp4/LeConquet_animation_shorelines.mp4"
+    },
+    {
+      "sitename": "Audierne",
+      "mp4": "mp4/Audierne_animation_shorelines.mp4"
+    },
+    {
+      "sitename": "Concarneau",
+      "mp4": "mp4/Concarneau_animation_shorelines.mp4"
+    },
+    {
+      "sitename": "LeCrouesty",
+      "mp4": "mp4/LeCrouesty_animation_shorelines.mp4"
+    },
+    {
+      "sitename": "SaintNazaire",
+      "mp4": "mp4/SaintNazaire_animation_shorelines.mp4"
+    },
+    {
+      "sitename": "LHerbaudiere",
+      "mp4": "mp4/LHerbaudiere_animation_shorelines.mp4"
+    },
+    {
+      "sitename": "AiguillonSurMer",
+      "mp4": "mp4/AiguillonSurMer_animation_shorelines.mp4"
+    },
+    {
+      "sitename": "Mimizan",
+      "mp4": "mp4/Mimizan_animation_shorelines.mp4"
+    },
+    {
+      "sitename": "Lerwick",
+      "mp4": "mp4/Lerwick_animation_shorelines.mp4"
+    },
+    {
+      "sitename": "Aberdeen",
+      "mp4": "mp4/Aberdeen_animation_shorelines.mp4"
+    },
+    {
+      "sitename": "Kinlochbervie",
+      "mp4": "mp4/Kinlochbervie_animation_shorelines.mp4"
+    },
+    {
+      "sitename": "Wick",
+      "mp4": "https://example.com/Kinlochbervie.mp4"
+    },
+    {
+      "sitename": "Tobermory",
+      "mp4": "https://example.com/Tobermory.mp4"
+    },
+    {
+      "sitename": "Millport",
+      "mp4": "https://example.com/Millport.mp4"
+    },
+    {
+      "sitename": "Leith",
+      "mp4": "https://example.com/Leith.mp4"
+    },
+    {
+      "sitename": "Portrush",
+      "mp4": "https://example.com/Portrush.mp4"
+    },
+    {
+      "sitename": "Workington",
+      "mp4": "https://example.com/Workington.mp4"
+    },
+    {
+      "sitename": "Whitby",
+      "mp4": "https://example.com/Whitby.mp4"
+    },
+    {
+      "sitename": "Cromer",
+      "mp4": "https://example.com/Cromer.mp4"
+    },
+    {
+      "sitename": "Harwich",
+      "mp4": "https://example.com/Harwich.mp4"
+    },
+    {
+      "sitename": "Dover",
+      "mp4": "https://example.com/Dover.mp4"
+    },
+    {
+      "sitename": "Holyhead",
+      "mp4": "https://example.com/Holyhead.mp4"
+    },
+    {
+      "sitename": "StHelierJersey",
+      "mp4": "https://example.com/StHelierJersey.mp4"
+    }
+  ]
+}

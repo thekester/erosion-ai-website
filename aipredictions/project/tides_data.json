@@ -1,0 +1,149 @@
+{
+  "sites": [
+    {
+      "sitename": "NARRA",
+      "url": "",
+      "file1": "",
+      "file2": ""
+    },
+    {
+      "sitename": "Dunkerque",
+      "url": "https://www.sonel.org/spip.php?page=maregraphe&idStation=1758",
+      "file1": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Doodson-DUNKERQUE.slv",
+      "file2": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Demerliac-DUNKERQUE.slv",
+      "type": "sonel"
+    },
+    {
+      "sitename": "DUNKERQUEPORT",
+      "url": "https://www.sonel.org/spip.php?page=maregraphe&idStation=1758",
+      "file1": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Doodson-DUNKERQUEPORT.slv",
+      "file2": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Demerliac-DUNKERQUEPORT.slv",
+      "type": "sonel"
+    },
+    {
+      "sitename": "HEMMESDEMARCK",
+      "url": "",
+      "file1": "",
+      "file2": ""
+    },
+    {
+      "sitename": "CALAIS",
+      "url": "https://www.sonel.org/?page=maregraphe&idStation=1739",
+      "file1": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Doodson-CALAIS.slv",
+      "file2": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Demerliac-CALAIS.slv",
+      "type": "sonel"
+    },
+    {
+      "sitename": "BoulogneSurMer",
+      "url": "https://www.sonel.org/?page=maregraphe&idStation=1735",
+      "file1": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Doodson-BOULOGNESURMER.slv",
+      "file2": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Demerliac-BOULOGNESURMER.slv",
+      "type": "sonel"
+    },
+    {
+      "sitename": "Dieppe",
+      "url": "https://www.sonel.org/?page=maregraphe&idStation=1904",
+      "file1": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Doodson-DIEPPE.slv",
+      "file2": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Demerliac-DIEPPE.slv",
+      "type": "sonel"
+    },
+    {
+      "sitename": "Ouistreham",
+      "url": "https://www.sonel.org/?page=maregraphe&idStation=3745",
+      "file1": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Doodson-OUISTREHAM.slv",
+      "file2": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Demerliac-OUISTREHAM.slv",
+      "type": "sonel"
+    },
+    {
+      "sitename": "Cherbourg",
+      "url": "https://www.sonel.org/?page=maregraphe&idStation=1748",
+      "file1": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Doodson-CHERBOURG.slv",
+      "file2": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Demerliac-CHERBOURG.slv",
+      "type": "sonel"
+    },
+    {
+      "sitename": "DIELETTE",
+      "url": "https://www.sonel.org/?page=maregraphe&idStation=3744",
+      "file1": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Doodson-DIELETTE.slv",
+      "file2": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Demerliac-DIELETTE.slv",
+      "type": "sonel"
+    },
+    {
+      "sitename": "SAINTMALO",
+      "url": "https://www.sonel.org/?page=maregraphe&idStation=1866",
+      "file1": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Doodson-SAINTMALO.slv",
+      "file2": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Demerliac-SAINTMALO.slv",
+      "type": "sonel"
+    },
+    {
+      "sitename": "SaintQuayPortrieux",
+      "url": "https://www.sonel.org/?page=maregraphe&idStation=4255",
+      "file1": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Doodson-SAINTQUAYPORTRIEUX.slv",
+      "file2": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Demerliac-SAINTQUAYPORTRIEUX.slv",
+      "type": "sonel"
+    },
+    {
+      "sitename": "Roscoff",
+      "url": "https://www.sonel.org/?page=maregraphe&idStation=1865",
+      "file1": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Doodson-ROSCOFF.slv",
+      "file2": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Demerliac-ROSCOFF.slv",
+      "type": "sonel"
+    },
+    {
+      "sitename": "LeConquet",
+      "url": "https://www.sonel.org/?page=maregraphe&idStation=1792",
+      "file1": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Doodson-LECONQUET.slv",
+      "file2": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Demerliac-LECONQUET.slv",
+      "type": "sonel"
+    },
+    {
+      "sitename": "Audierne",
+      "url": "https://www.sonel.org/?page=maregraphe&idStation=4350",
+      "file1": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Doodson-AUDIERNE.slv",
+      "file2": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Demerliac-AUDIERNE.slv",
+      "type": "sonel"
+    },
+    {
+      "sitename": "Concarneau",
+      "url": "https://www.sonel.org/?page=maregraphe&idStation=1751",
+      "file1": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Doodson-CONCARNEAU.slv",
+      "file2": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Demerliac-CONCARNEAU.slv",
+      "type": "sonel"
+    },
+    {
+      "sitename": "LeCrouesty",
+      "url": "https://www.sonel.org/?page=maregraphe&idStation=1793",
+      "file1": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Doodson-LECROUESTY.slv",
+      "file2": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Demerliac-LECROUESTY.slv",
+      "type": "sonel"
+    },
+    {
+      "sitename": "SaintNazaire",
+      "url": "https://www.sonel.org/?page=maregraphe&idStation=1846",
+      "file1": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Doodson-SAINTNAZAIRE.slv",
+      "file2": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Demerliac-SAINTNAZAIRE.slv",
+      "type": "sonel"
+    },
+    {
+      "sitename": "LHerbaudiere",
+      "url": "https://www.sonel.org/?page=maregraphe&idStation=3478",
+      "file1": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Doodson-LHERBAUDIERE.slv",
+      "file2": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Demerliac-LHERBAUDIERE.slv",
+      "type": "sonel"
+    },
+    {
+      "sitename": "AiguillonSurMer",
+      "url": "https://www.sonel.org/?page=maregraphe&idStation=3475",
+      "file1": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Doodson-AIGUILLONSURMER.slv",
+      "file2": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Demerliac-AIGUILLONSURMER.slv",
+      "type": "sonel"
+    },
+    {
+      "sitename": "Mimizan",
+      "url": "https://www.sonel.org/?page=maregraphe&idStation=3479",
+      "file1": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Doodson-MIMIZAN.slv",
+      "file2": "https://erosion-ai.tavenel.fr/aipredictions/project/tidesdata/Demerliac-MIMIZAN.slv",
+      "type": "sonel"
+    }
+  ]
+}

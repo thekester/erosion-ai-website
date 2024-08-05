@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Activities</title>
+     <!-- Favicon for browser -->
+     <link rel="icon" type="image/png" sizes="32x32" href="../images/favicon-32x32.png">
+     <link rel="icon" type="image/png" sizes="16x16" href="../images/favicon-16x16.png">
+     <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
+ 
+     <!-- Favicon for Apple -->
+     <link rel="apple-touch-icon" href="../images/apple-touch-icon.png">
+ 
+     <!-- Favicon for Android -->
+     <link rel="icon" type="image/png" sizes="192x192" href="../images/android-chrome-192x192.png">
+     <link rel="icon" type="image/png" sizes="512x512" href="../images/android-chrome-512x512.png">
+ 
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .day {
+            margin-bottom: 20px;
+        }
+        .day h2 {
+            color: #007BFF;
+            border-bottom: 2px solid #007BFF;
+            padding-bottom: 5px;
+        }
+        .day p {
+            font-size: 1.1em;
+            color: #555;
+        }
+
+        .day img {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            margin: 10px auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .day embed {
+
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+             /* Media query for mobile devices */
+             @media (max-width: 600px) {
+            .day embed {
+                width: 100%;
+                border-radius: 8px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>My Daily Activities</h1>
+        <div class="day">
+            <h2>Monday, 10 June</h2>
+            <p>Fistly, i explore some resources and data</p>
+            <p>Create a first-try with Openstreetmap Coastline in <a target="_blank" href="https://edx.tavenel.fr/coastalerosion/index2.html">https://edx.tavenel.fr/coastalerosion/index2.html</a> </p>
+        </div>
+        <div class="day">
+            <h2>Tuesday, 11 June</h2>
+            <p>I've done a presentation of my works</p>
+            <embed src=../pdf/SlidesCoastalErosionFirstTryTheophile.pdf width=800 height=500 type='application/pdf'/>
+            <p>Define the topic: Interactive Coastal Erosion Map with AI Predictions</p>
+            <p>I improve my first-try</p>
+        </div>
+        <div class="day">
+            <h2>Wednesday, 12 June</h2>
+            <p>I've done a first try with Flask project with NASA API based on <a target="_blank" href="https://github.com/nasa/earth-imagery-api/">NASA Earth Imagery API</a></p>
+            <img src="../images/flaskapiinterfacepart1.png" alt="flaskapiinterfacepart1">
+            <img src="../images/flaskapiinterfacepart2.png" alt="flaskapiinterfacepart2">
+            <p>Began developing the website <a target="_blank" href="https://erosion-ai.tavenel.fr/">https://erosion-ai.tavenel.fr/</a> to showcase my work at the Coastal Engineering & Ocean Climate (CEOC) center. This includes my research on the Interactive Coastal Erosion Map with AI Predictions topic.</p>
+            <p>Discover a new tool : <a target="_blank" href="https://livingatlas.arcgis.com/wayback/">https://livingatlas.arcgis.com/wayback/</a></p>
+            <p>Correct errors on the tool and made a pull request on an opensource project:  <a target="_blank" href="https://github.com/Esri/wayback">https://github.com/Esri/wayback</a> </p>
+            <p>Create a local implementation of the ESRI | World Imagery Wayback</p>
+        </div>
+        <div class="day">
+            <h2>Thursday, 13 June</h2>
+            <p>New prototype idea</p>
+            <img src="../images/esriideaonpaper.png" alt="esriideaonpaper">
+            <p>The idea is to use World Imagery Wayback to create a custom basemap with ESRI and ArcGIS, and then combine that map with Mapbox.</p>
+            <p>Using Machine Learning algorithms with historical previews, I could identify the coastline.</p>
+            <p>With historical coastlines, I could create local animations of coastal erosion.</p>
+            <p>For example, displaying the coastline in different colors to show the erosion over time, with a 2024 map to illustrate coastal changes.</p>
+            <p>The data would be stored in JSON format with corresponding years.</p>
+            <p>But encounter some issues to proceed like that (cannot download pictures)</p>   
+            <p>Find an interesting article <a target="_blank" href="https://www.sciencedirect.com/science/article/pii/S0034425722001584">https://www.sciencedirect.com/science/article/pii/S0034425722001584</a></p>
+            <p>Find a useful database: <a target="_blank" href="https://openmldata.ukho.gov.uk/">https://openmldata.ukho.gov.uk/</a></p>
+        </div>
+        <div class="day">
+            <h2>Friday, 14 June</h2>
+            <p>Fit a model in order to find where the coastline is on a picture</p>
+            <img src="../images/loadingimagesandlabels.png" alt="loadingimagesandlabels">
+            <img src="../images/sample01v2.png" alt="sample01v2">
+            <img src="../images/epoch1slash50.png" alt="epoch1slash50">
+            <p>You could check the training and validation metrics in <a target="_blank" href="../machinelearningprocess/resultSamplepage.html">this link</a></p>
+            <p>Create the github repository with python code in <a target="_blank" href="https://github.com/thekester/coastline-ML">Repository github coastline-ML</a></p>
+        </div>
+        <div class="day">
+            <h2>Monday, 17 June</h2>
+            <p>Add the coastline openstreetmap project on erosion-ai [Ireland implemented]</p>
+            <a href="https://erosion-ai.tavenel.fr/openstreetmapcoastlineproject/openstreetmapcoastlineproject.html">Check the coastline image project on erosion-ai</a></p>
+            <p>Add the satellite-imagery interface on gitub</p>
+            <a href="https://github.com/thekester/satellite-imagery-interface">Code project on github</a>
+            <p>Try to give to coastline-ML the following picture</p>
+            <img src="../images/googleearthstudio.png" alt="googleearthstudio picture">
+            <p>And i obtain the following result</p>
+            <img src="../images/argh.png" alt="argh picture">
+            <p>And me who just want to obtain the coastline automatically from google earth studio , what could i do?</p>
+            <p>The coastline-ML needs to have a tif image with a label picture where the coastline is identified in order to generate a coastline prediction</p>
+            <img src="../images/imagechannel.png" alt="imagechannel">
+            <p>So i want to find a way to generate automatically the label picture if i want to use coastline-ML to predict the coastline.</p>
+            <img src="../images/whatineed.png" alt="whatineed">
+            <p>In addition i would like to obtain the coastline but with geoJson data like that </p>
+            <img src="../images/geojsonexample.png" alt="geojsonexample">
+            <p>Find interesting resources to explore</p>
+            <a href="https://arxiv.org/pdf/2405.11500">Interpreting a Semantic Segmentation Model for Coastline Detection</a>
+            <a href="https://github.com/conorosully/interpreting-coastline-unet/tree/main">interpreting-coastline-unet</a>
+            <a href="https://github.com/conorosully/SWED-edge-detection/tree/main-">SWED-edge-detection</a>
+        </div>
+        <div class="day">
+            <h2>Tuesday, 18 June</h2>
+            <p>Try to implement a Semantic Segmentation Model for Coastline Detection by transform original image to label </p>
+            <p>Create a new github code project by forking the existing code project <a href="https://github.com/conorosully/SWED-edge-detection">https://github.com/conorosully/SWED-edge-detection</a> </p>
+            <p>Add my work on that project here :<a href="https://github.com/thekester/SWED-edge-detection/tree/dev">click here</a></p>
+
+        </div>
+        <div class="day">
+            <h2>Wednesday, 19 June</h2>
+            <p>Improve the powerpoint presentation</p>
+            <p>Implement France in the openstreetmap coastline interactive map</p>
+        </div>
+        <div class="day">
+            <h2>Thursday, 20 June</h2>
+            <p>Try to train a unet model in order to automatically generate the label image with accuracy apprixmatively 0.46</p>
+            <a href="../machinelearningprocess/unet_automatic_label_image_generation.html">Check training metrics here!</a>
+            <p>Create the coastal sentinel repository on github</p>
+            <a href="https://github.com/thekester/coastalSentinel">Repository code project</a>
+            <p>Improve the mapbox appearance for interactive maps</p>
+        </div>
+        <div class="day">
+            <h2>Friday, 21 June</h2>
+            <p>Create the first prototype : <a href="https://erosion-ai.tavenel.fr/openstreetmapcoastlineproject/dounambay/dounambay.html">Check the first prototype with Dounam bay</a></p>
+        </div>
+        <div class="day">
+            <h2>Monday, 24 June</h2>
+            <p>I create a word document to write my work for the last two weeks.</p>
+            <p>Looking for new labelling methods</p>
+        </div>
+        <div class="day">
+            <h2>Tuesday, 25 June</h2>
+            <p>Implement new models with new labeling methods</p>
+            <p>Improve the repository CoastalSentinel github project : <a href="https://github.com/thekester/coastalSentinel">Check here!</a> </p>
+            <img src="../images/coastalsentinel.png" alt="coastalsentinel readme screenshot">
+        </div>
+        <div class="day">
+            <h2>Wednesday, 26 June</h2>
+            <p>I improve the coastal sentinel Jupyter notebook</p>
+            <p>Prepare the tomorrow presentation</p>
+        </div>
+        <div class="day">
+            <h2>Thursday, 27 June</h2>
+            <p>Held a presentation of my works for the 3 weeks to CEOC group online meeting</p>
+            <p>The pdf presentation file</p>
+            <embed src=../pdf/CoastalErosionAI-27062024.pdf width=800 height=500 type='application/pdf'/>
+        </div>
+        <div class="day">
+            <h2>Friday, 28 June</h2>
+            <p>Prepare a new dataset for classification in Machine Learning to make the difference between mainland and water</p>
+            <a href="../zip/classification.zip">Here is the dataset </a>
+            <br>
+            <a href="../zip/classification2.zip">Here is the dataset (Updated), still in progress </a>
+            <p>Next, try to combine the classification dataset with an u-net model to make autolabelling for the dataset and find the coastline automatically.</p>
+        </div>
+        <div class="day">
+            <h2>Monday, 1 July</h2>
+            <p>Improve the new dataset (~1000 images)</p>
+            <p>Implement my code trials and ideas (still chaotic)</p>
+            <a href="../zip/googlearthdata.zip">Here is the chaotic dataset (Updated), and code, still in progress </a>
+            <img src="../images/classification_image.png" alt="coastalsentinel readme screenshot">
+        </div>
+        <div class="day">
+            <h2>Tuesday, 2 July</h2>
+            <p>Develop the classifcation model algorithm to obtain the difference between mainland and water</p>
+        </div>
+        <div class="day">
+            <h2>Wednesday, 3 July</h2>
+            <p>Try to implement a manual loss function to guide the classification if very wrong </p>
+            <p>New presentation</p>
+            <a target="_blank" href="../powerpoint/CoastalErosionAI-04072024.pptx">Here is the new slides</a>
+        </div>
+        <div class="day">
+            <h2>Thursday, 4 July</h2>
+            <p>Meeting with Hachem Kassem at 11:00 </p>
+            <p>The working in progress presentation</p>
+            <embed src=../pdf/CoastalErosionAIWorkingProgress-04072024–11072024.pdf width=800 height=500 type='application/pdf'/>
+            <p>Commit a lot of changes in coastal sentinel</p>
+            <img src="../images/commitin04072024.png" alt="commitin04072024">
+        </div>
+        <div class="day">
+            <h2>Friday, 5 July</h2>
+            <p>Fix bugs in coastsat software</p>
+            <a href="https://github.com/kvos/CoastSat/issues/512">View the issue written here</a>
+            <p>I was able to start manipulating the software</p>
+        </div>
+        <div class="day">
+            <h2>Monday, 8 July</h2>
+            <p>I created a pull request on coastsat project to solve the issues i encountered</p>
+            <img src="../images/pullrequest.png" alt="pull request">
+            <p>Coding the new prototype , work in progress ... (<a target="_blank" href="https://erosion-ai.tavenel.fr/aipredictions/project/project.html">Check here</a>)</p>
+            <img src="../images/newprototype.png" alt="new prototype">
+            <p>Improve the new prototype by adding linear trend and cross shore change</p>
+            <img src="../images/newprototypefirstimprovement.png" alt="new prototype first improvement">
+        </div>
+        <div class="day">
+            <h2>Tuesday, 9 July</h2>
+            <p>Begin to implement Openstreetmap coastline</p>
+            <p>Improve popup style and add new events on click</p>
+            <p>Download coastsat datas</p>
+            <img src="../images/downloadtimeseries.png" alt="downloadtimeseries">
+        </div>
+        <div class="day">
+            <h2>Wednesday, 10 July</h2>
+            <p>Try to manipulate the coastsat software but encounter many issues and bugs</p>
+        </div>
+        <div class="day">
+            <h2>Thursday, 11 July</h2>
+            <p>Try to manipulate the coastsat software but encounter many issues and bugs</p>
+            <a target="_blank" href="../pdf/CoastalErosionAI-04072024–11072024.pdf">Slides meeting CEOC 11/07/2024</a>
+        </div>
+        <div class="day">
+            <h2>Friday, 12 July</h2>
+            <p>Try to make AI predictions on None values in shoreleins datas but loss on 6*10^22 so still working on progress ... </p>
+            <a target="_blank" href="../aipredictions/project/predictionmodel.html">Prediction model</a>
+        </div>
+        <div class="day">
+            <h2>Monday, 15 July</h2>
+            <a target="_blank" href="../aipredictions/project/predictionmodel3.html">Prediction model easiest</a>
+            <p>Add a canvas for all transects in a shoreline popup</p>
+        </div>
+        <div class="day">
+            <h2>Tuesday, 16 July</h2>
+            <p>Make time series forecasting on shore cross datapoints</p>
+            <p>Combine filled approaches to find values behind None, and apply trend method forecasting to predict the future (up to 2030) .</p>
+            <img src="../images/timeseriesforecasting.png" alt="timeseriesforecasting">
+        </div>
+        <div class="day">
+            <h2>Wednesday, 17 July</h2>
+            <p>Implement methods to predict the past (1970) </p>
+            <img src="../images/pastforecasting.png" alt="pastforecasting"
+        </div>
+        <div class="day">
+            <h2>Thursday, 18 July</h2>
+            <p>Make more realistic times forecasting for holtWintersForecast and seasonalDecompositionForecast</p>
+            <p>New presentation</p>
+            <a target="_blank" href="../powerpoint/CoastalErosionAIWorkingProgress-11072024–18072024.pptx">Here is the new slides</a>
+        </div>
+        <div class="day">
+            <h2>Friday, 19 July</h2>
+            <p>Start to write a technical paper on my research topic</p>
+            <a target="_blank" href="../technicalPaper.html">The technical paper</a>
+            <p>Add other CSV datas (Mex, Chili) to the map</p>
+        </div>
+        <div class="day">
+            <h2>Monday, 22 July</h2>
+            <p>Succesfully understand coastsat software</p>
+            <p>I successfully added a popup system with mp4 movies to visualize shoreline animations on a given sitename.</p>
+            <img src="../images/newpopupsystem.png" alt="New popup systems for mp4 shoreline animations">
+        </div>
+        <div class="day">
+            <h2>Tuesday, 23 July</h2>
+            <p>Implement comparison mechanism between shoreline images</p>
+            <p>Improve popup systems (Popup scrollable, header fixed to exit anytime ... )</p>
+            <p>Succesfully implementing sea level data for Dunkerque: Datas available on <a target="_blank" href="https://www.sonel.org/spip.php?page=maregraphe&idStation=1758">https://www.sonel.org/spip.php?page=maregraphe&idStation=1758</a></p>
+            <p>Shorelines animations for coastsat are available on markers in France</p>
+        </div>
+        <div class="day">
+            <h2>Wednesday, 24 July</h2>
+            <p>Implement some station datas in France for sea level</p>
+            <p>Find two interesting databases for tides and sea level for the United Kingdom:  <a target="_blank" href="https://ntslf.org/products/sea-level-trend-charts">NTSLF</a> and <a target="_blank" href="https://psmsl.org/data/obtaining/map.html">PSMSL</a></p>
+            <p>Implement new markers in France coasts based on stations locations in <a href="https://www.sonel.org/spip.php?page=maregraphe">SONEL</a> </p>
+            <img src="../images/newMarkersOnfrance.png" alt="newMarkersOnfrance">
+            <p>Find an interesting post on Linkedin</p>
+            <iframe src="https://www.linkedin.com/embed/feed/update/urn:li:share:7214592858983428096" height="957" width="504" frameborder="0" allowfullscreen="" title="Post intégré"></iframe>
+        </div>
+        <div class="day">
+            <h2>Thursday, 25 July</h2>
+            <p>Improve the technical paper especialy the current state of art of the research topic.</p>
+            <p>Find an interesting link: <a target="_blank" href="https://coastalews.wrl.unsw.edu.au/local/Narrabeen/">Narabeen focus</a></p>
+        </div>
+        <div class="day">
+            <h2>Friday, 26 July</h2>
+            <p>Add polygons in orange for sites_data.json in the map</p>
+            <p>Find an interesting github repository: <a target="_blank" href="https://github.com/fmemuir/COASTGUARD/">COASTGARD</a></p>
+            <p>Continue to improve my technical paper</p>
+        </div>
+        <div class="day">
+            <h2>Monday, 29 July</h2>
+            <p>Correct bugs and improve script to study specific Region Of Interest</p>
+            <p>Find a useful extension of coastsat : <a target="_blank" href="https://github.com/SatelliteShorelines/CoastSeg">CoastSeg extension of coastsat</a></p>
+            <p>Implement times forecasting choices on single transect</p>
+        </div>
+        <div class="day">
+            <h2>Tuesday, 30 July</h2>
+            <p>Repair time forecasting interactions </p>
+            <img alt="repairaipredictions" src="../images/repairaipredictions.png">
+            <p>Improve message on single transects div study </p>
+            <img alt="improvewelcomemessage" src="../images/improvewelcomemessage.png">
+            <p>Improve mobile interface of the latest prototype: <a target="_blank" href="https://erosion-ai.tavenel.fr/aipredictions/project/project.html">https://erosion-ai.tavenel.fr/aipredictions/project/project.html</a></p>
+        </div>
+        <div class="day">
+            <h2>Wednesday, 31 July</h2>
+            <p>Implement new datapoints for France and United Kingdom with coastsat software</p>   
+            <p>Find datas for UK Tide Gauge Network site map in <a target="_blank" href="https://www.bodc.ac.uk/data/hosted_data_systems/sea_level/uk_tide_gauge_network/processed/">https://www.bodc.ac.uk/data/hosted_data_systems/sea_level/uk_tide_gauge_network/processed/</a></p> 
+            <img alt="uktidegaugenetworksitemap" src="../images/uktidegaugenetworksitemap.png">
+            <p>Find an interesting post on Linkedin for coastal erosion</p>
+            <iframe src="https://www.linkedin.com/embed/feed/update/urn:li:ugcPost:7224330011455995904" height="1249" width="504" frameborder="0" allowfullscreen="" title="Post intégré"></iframe>            
+        </div>
+        <div class="day">
+            <h2>Thursday, 1 August</h2>
+            <p>Implement new datapoints in United Kingdom</p>
+            <img alt="newdatapointsinunitedkingdom" src="../images/newdatapointsinunitedkingdom.png">
+            <p>Start to use CoastSeg (Fixes bugs)</p>
+        </div>
+        <div class="day">
+            <h2>Friday, 2 August</h2>
+            <p>Update the <a target="_blank" href="../technicalPaper.html">technical paper</a></p>
+            <p>Add missing tides datas for France</p>
+        </div>
+        <div class="day">
+            <h2>Monday, 5 August</h2>
+            <p>Put my website code on Github</p>
+            <p>Put my script to extract datas for multiple location on github</p>
+        </div>
+        <div class="day">
+            <h2>Tuesday, 6 August</h2>
+            <p>Implement Mediteranean datapoints for France </p>
+            <p>Implement transects for new datapoints</p>
+            <p>Implement shoreline images all times for each sitename</p>
+        </div>
+        <div class="day">
+            <h2>Wednesday, 7 August</h2>
+            <p>How to obtain beach slope?</p>
+            <p>How to create a simulation for present shoreline, past shoreline and future shoreline</p>        </div>
+        <div class="day">
+            <h2>Thursday, 8 August</h2>
+            <p>The last CEOC meeting of my internship </p>
+        </div>
+        <div class="day">
+            <h2>Friday, 9 August</h2>
+            <p>The last day of my internship as a visiting researcher</p>
+        </div>
+        <div class="day">
+            <h2>Challenge day</h2>
+            <p>Compared filled method with reconstructured images to compare the difference</p>
+            <p>Predict and draw shoreline when clouds</p>
+            <p>Implement more realistic past and future trends</p>
+            <p>Grab all features from <a href="http://coastsat.wrl.unsw.edu.au/">http://coastsat.wrl.unsw.edu.au/</a></p>
+        </div>
+    </div>
+</body>
+</html>

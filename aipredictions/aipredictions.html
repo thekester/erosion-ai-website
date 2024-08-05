@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Predictions for Future Coastlines</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.min.js">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        header {
+            background-color: #007BFF;
+            color: white;
+            padding: 1rem 0;
+            text-align: center;
+        }
+
+        .container {
+            margin: 2rem auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .content {
+            margin: 2rem 0;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1rem 0;
+            background-color: #007BFF;
+            color: white;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+
+        #chart-container {
+            margin-top: 2rem;
+        }
+
+        .table-container {
+            margin-top: 2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 18px;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #007BFF;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .btn-custom {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-custom:hover {
+            background-color: #218838;
+            color: white;
+        }
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column; /* En colonne pour les mobiles */
+            }
+            header .btn-custom{
+                width: 50%;
+                display: block;
+                margin: auto;
+                margin-top: 15px;
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>AI Predictions for Future Coastlines</h1>
+        <a target="_blank" href="project/project.html" class="btn-custom">Check the project on the interactive map</a>
+        <a target="_blank" href="project/predictionmodel.html" class="btn-custom">Prediction model (so complicated)</a>
+        <a target="_blank" href="project/predictionmodel3.html" class="btn-custom">Prediction model (easiest)</a>
+    </header>
+    <div class="container">
+        <div class="content">
+            <p>
+                The advancements in artificial intelligence (AI) have enabled remarkable progress in predicting future events based on existing data points. In the context of coastal changes, AI can analyze extensive datasets to forecast future coastline positions. This is particularly important for understanding and mitigating the impacts of climate change and rising sea levels.
+            </p>
+            <p>
+                In this example, we use data points that represent dates and cross-shore distances. By employing sophisticated algorithms, AI can identify patterns and trends that might not be evident through traditional analysis methods. This helps in creating more accurate and reliable predictions.
+            </p>
+            <p>
+                For the purposes of this demonstration, we generate random data points to simulate the current and predicted positions of coastlines. The "Current Position" data is generated randomly between 0 and 100, while the "Predicted Position" data adds a slight increase to simulate future changes.
+            </p>
+            <div id="chart-container">
+                <canvas id="coastlineChart"></canvas>
+            </div>
+            <div class="table-container">
+                <h2 class="center">AI Prediction Methods for Time Series</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Method</th>
+                            <th>Advantages</th>
+                            <th>Disadvantages</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Linear Regression</td>
+                            <td>Simple to implement, works well with linear relationships.</td>
+                            <td>Not suitable for non-linear data, limited in complexity.</td>
+                        </tr>
+                        <tr>
+                            <td>Random Forest</td>
+                            <td>Handles non-linear data, robust to outliers, can handle missing values.</td>
+                            <td>Can be computationally intensive, less interpretable.</td>
+                        </tr>
+                        <tr>
+                            <td>Support Vector Machines (SVM)</td>
+                            <td>Effective in high-dimensional spaces, works well with clear margin of separation.</td>
+                            <td>Not suitable for large datasets, choice of kernel can be tricky.</td>
+                        </tr>
+                        <tr>
+                            <td>Neural Networks (RNN/LSTM)</td>
+                            <td>Capable of capturing complex non-linear relationships, handles long-term dependencies.</td>
+                            <td>Requires large datasets, computationally intensive, difficult to interpret.</td>
+                        </tr>
+                        <tr>
+                            <td>Gradient Boosting Machines (GBM)</td>
+                            <td>High predictive accuracy, handles non-linear data, robust to overfitting.</td>
+                            <td>Can be slow to train, requires careful tuning.</td>
+                        </tr>
+                        <tr>
+                            <td>Prophet</td>
+                            <td>Handles missing data, strong performance with seasonal data, easy to use.</td>
+                            <td>Can be slower with very large datasets, less effective for short time series.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <footer>
+        <p>&copy; 2024 Future Coastline Predictions</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const ctx = document.getElementById('coastlineChart').getContext('2d');
+            const labels = Array.from({ length: 700 }, (_, i) => i + 1);
+            
+            // Generate random data to simulate current and predicted positions
+            const currentPositionData = Array.from({ length: 700 }, () => Math.random() * 100);
+            const predictedPositionData = currentPositionData.map(value => value + Math.random() * 5); // Slight increase to simulate prediction
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Current Position',
+                            data: currentPositionData,
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1,
+                            fill: false
+                        },
+                        {
+                            label: 'Predicted Position',
+                            data: predictedPositionData,
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    title: {
+                        display: true,
+                        text: 'Predicted Future Coastline Positions'
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Data Points'
+                            }
+                        },
+                        y: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Coastline Position'
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

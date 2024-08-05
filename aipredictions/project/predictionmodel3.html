@@ -1,0 +1,1568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Series Analysis and Prediction</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/date-fns/1.27.1/date_fns.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-luxon/1.0.0/chartjs-adapter-luxon.esm.js" integrity="sha512-kRjXamsw+O1EGy2IFWvxwkk2JzL0QRys/qETrt3ZQkaRCmQyeMtKqHaotb0ARu6YnRPMo3YIBu35H4cQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/luxon/2.1.1/luxon.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-polyfills/0.1.43/polyfill.min.js" integrity="sha512-lvWiOP+aMKHllm4THsjzNleVuGOh0WGniJ3lgu/nvCbex1LlaQSxySUjAu/LTJw9FhnSL/PVYoQcckg1Q03+fQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>    
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        h1, h2, h3 {
+            text-align: center;
+            color: #333;
+        }
+
+        h1 {
+            margin-top: 20px;
+        }
+
+        .section {
+            margin: 20px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .description {
+            margin-bottom: 20px;
+            color: #555;
+            font-size: 18px;
+        }
+
+        .explanation {
+            margin-top: 20px;
+            color: #555;
+            font-size: 16px;
+        }
+
+        button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        canvas {
+            margin-top: 20px;
+            width: 100%;
+            height: 400px;
+        }
+
+        .chart-container {
+            margin-bottom: 40px;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            padding: 10px;
+            border-radius: 4px;
+            overflow: auto;
+        }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 0.9em;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .styled-table thead tr {
+            background-color: #009879;
+            color: #ffffff;
+            text-align: left;
+        }
+
+        .styled-table th,
+        .styled-table td {
+            padding: 12px 15px;
+            border: 1px solid #dddddd;
+        }
+
+        .styled-table tbody tr {
+            border-bottom: 1px solid #dddddd;
+        }
+
+        .styled-table tbody tr:nth-of-type(even) {
+            background-color: #f3f3f3;
+        }
+
+        .styled-table tbody tr:last-of-type {
+            border-bottom: 2px solid #009879;
+        }
+
+        .styled-table tbody tr:hover {
+            background-color: #f1f1f1;
+            cursor: pointer;
+        }
+
+        .file-details {
+            margin-bottom: 20px;
+        }
+
+        .file-details h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.2em;
+        }
+
+        .info-icon {
+            cursor: pointer;
+            color: #007bff;
+            font-size: 1.2em;
+            margin-left: 10px;
+        }
+
+        .info-popup {
+            display: none;
+            position: absolute;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 300px;
+        }
+
+        .info-popup::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 10px solid #ddd;
+        }
+
+        .info-popup::after {
+            content: "";
+            position: absolute;
+            top: -8px;
+            left: 20px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 8px solid #fff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Time Series Analysis and Prediction</h1>
+
+    <div class="section">
+        <h2>1. Moving Average</h2>
+        <div class="description">
+            The Moving Average is a method to smooth out time series data by calculating the average of data points over a sliding window. This can be used to fill in missing values or predict future values based on past data.
+            <br>
+            The formula for the moving average is:
+            $$ MA_t = \frac{1}{n} \sum_{i=0}^{n-1} X_{t-i} $$
+        </div>
+        <button onclick="performMovingAverageFromExample()">Calculate Moving Average</button>
+        <canvas id="chartMovingAverage"></canvas>
+        <pre id="outputMovingAverage"></pre>
+        <div class="explanation" id="explanationMovingAverage"></div>
+    </div>
+
+    <div class="section">
+        <h2>2. Linear Interpolation</h2>
+        <div class="description">
+            Linear Interpolation is a method to estimate missing values by fitting a straight line between two known points. It can be used to fill in gaps in time series data.
+            <br>
+            The formula for linear interpolation is:
+            $$ X_t = X_{t_0} + (X_{t_1} - X_{t_0}) \times \frac{t - t_0}{t_1 - t_0} $$
+        </div>
+        <button onclick="performLinearInterpolationFromExample()">Perform Linear Interpolation</button>
+        <canvas id="chartLinearInterpolation"></canvas>
+        <pre id="outputLinearInterpolation"></pre>
+        <div class="explanation" id="explanationLinearInterpolation"></div>
+    </div>
+
+    <div class="section">
+        <h2>3. Simple Exponential Smoothing</h2>
+        <div class="description">
+            Simple Exponential Smoothing is a method to smooth time series data by applying an exponentially decreasing weight to past observations. It can be used to fill in missing values or predict future values.
+            <br>
+            The formula for simple exponential smoothing is:
+            $$ S_t = \alpha X_t + (1 - \alpha) S_{t-1} $$
+        </div>
+        <button onclick="applyExponentialSmoothingFromExample()">Apply Exponential Smoothing</button>
+        <canvas id="chartExponentialSmoothing"></canvas>
+        <pre id="outputExponentialSmoothing"></pre>
+        <div class="explanation" id="explanationExponentialSmoothing"></div>
+    </div>
+
+    <div class="section">
+        <button onclick="loadRandomFilesAndApplyMethod()">Load Random Files and Apply Method</button>
+        <select id="method-select">
+            <option value="movingAverage">Moving Average</option>
+            <option value="linearInterpolation">Linear Interpolation</option>
+            <option value="exponentialSmoothing">Exponential Smoothing</option>
+        </select>
+        <label for="window-size">Window Size:</label>
+        <select id="window-size">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+            <option value="25">25</option>
+            <option value="30">30</option>
+            <option value="35">35</option>
+            <option value="40">40</option>
+            <option value="45">45</option>
+            <option value="50">50</option>
+        </select>
+        <i class="fas fa-info-circle info-icon" onclick="toggleInfoPopup()"></i>
+        <div class="info-popup" id="info-popup">
+            The "Window Size" determines the number of data points to include in the moving average calculation. A larger window size will produce a smoother result, but may be less responsive to recent changes in the data.
+        </div>
+        <canvas id="chartRandomFiles"></canvas>
+        <pre id="outputRandomFiles"></pre>
+        <div class="explanation" id="explanationRandomFiles"></div>
+    </div>
+
+    <div class="section">
+        <h2>4. Shoreline Analysis</h2>
+        <button onclick="loadShorelineFilesAndApplyMethod()">Load Shoreline Files and Apply Method</button>
+        <select id="shoreline-method-select">
+            <option value="movingAverage">Moving Average</option>
+            <option value="linearInterpolation">Linear Interpolation</option>
+            <option value="exponentialSmoothing">Exponential Smoothing</option>
+        </select>
+        <label for="shoreline-window-size">Window Size:</label>
+        <select id="shoreline-window-size">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+            <option value="25">25</option>
+            <option value="30">30</option>
+            <option value="35">35</option>
+            <option value="40">40</option>
+            <option value="45">45</option>
+            <option value="50">50</option>
+        </select>
+        <i class="fas fa-info-circle info-icon" onclick="toggleShorelineInfoPopup()"></i>
+        <div class="info-popup" id="shoreline-info-popup">
+            The "Window Size" determines the number of data points to include in the moving average calculation. A larger window size will produce a smoother result, but may be less responsive to recent changes in the data.
+        </div>
+        <canvas id="chartShoreline"></canvas>
+        <pre id="outputShoreline"></pre>
+        <div class="explanation" id="explanationShoreline"></div>
+    </div>
+
+    <div class="section">
+        <h2>5. Time series forecasting</h2>
+        <div class="description">
+            Trend Analysis uses linear regression to determine the trend line that best fits the data. This can be useful for identifying long-term trends and making future predictions.
+            
+    
+            The formula for the trend line is:
+            $$ y = mx + b $$
+            where \( m \) is the slope and \( b \) is the intercept.
+            
+    
+            There are many different methods for time series forecasting, including classical methods, machine learning models, and statistical models. Some of the most popular methods include:
+            <ul>
+                <li>Naïve: This method simply uses the last observed value as the forecast for all future periods.</li>
+                <li>SNaïve: This method uses the last observed value from the same season of the year as the forecast for the next period.</li>
+                <li>Seasonal Decomposition: This method decomposes the time series into trend, seasonal, and remainder components, and then forecasts each component separately.</li>
+                <li>Exponential Smoothing: This method uses exponentially weighted moving averages to forecast future values, giving more weight to recent observations.</li>
+                <li>ARIMA: This method models the time series as an autoregressive moving average process, and uses past observations and errors to forecast future values.</li>
+                <li>SARIMA: This method extends the ARIMA model to handle seasonal data, by including seasonal differencing and seasonal autoregressive and moving average terms.</li>
+            </ul>
+            Choosing the most effective method depends on several factors, such as the characteristics of the data, the objectives of the analysis, and the available resources. To choose the right forecasting model, you need to consider factors such as the amount of accuracy or inaccuracy you can tolerate with your model. Autoregressive integrated moving average (ARIMA) models are among the most widely used time series forecasting techniques.
+            <a target="_blank" href="https://erosion-ai.tavenel.fr/aipredictions/project/time-series/">Check here if you want to download a CSV file in order to try trend methods</a>
+        </div>
+        <select id="trend-method-select" onchange="updateOptionsVisibility()">
+            <option value="naive">Naïve</option>
+            <option value="snaive">SNaïve</option>
+            <option value="seasonaldecomposition">Seasonal Decomposition</option>
+            <option value="statespacemodelforecast">State Space Model</option>
+            <option value="holtWintersForecast">Holt-Winters</option>
+            <option disabled value="arima">ARIMA</option>
+            <option disabled value="sarima">SARIMA</option>
+        </select>
+        
+        <select id="trend-filled-method-select" onchange="updateOptionsVisibility()">
+            <option value="movingAverage">Moving Average</option>
+            <option value="linearInterpolation">Linear Interpolation</option>
+            <option value="exponentialSmoothing">Exponential Smoothing</option>
+        </select>
+
+        <div id="window-size-container">
+            <label for="trend-window-size-select">Window Size:</label>
+            <select id="trend-window-size-select">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
+                <option value="25">25</option>
+                <option value="30">30</option>
+            </select>
+        </div>
+        
+        <div id="seasonal-period-container" style="display:none;">
+            <label for="seasonal-period-select">Seasonal Period:</label>
+            <select id="seasonal-period-select">
+                <option value="12">12</option>
+                <option value="6">6</option>
+                <option value="3">3</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="prediction-mode-select">Prediction Mode:</label>
+            <select id="prediction-mode-select" onchange="setPredictionMode(this.value)">
+                <option value="past">Past</option>
+                <option value="future">Future</option>
+                <option value="both" selected>Both</option>
+            </select>
+        </div>
+
+        <div class="info-popup" id="trend-info-popup">
+            The "Window Size" determines the number of data points to include in the moving average calculation. A larger window size will produce a smoother result, but may be less responsive to recent changes in the data.
+        </div>
+        <button onclick="performTrendAnalysis()">Calculate and Plot Trend Line</button>
+        <input type="file" id="csvFileInput" accept=".csv" style="margin: 20px auto; display: block;">
+        <canvas id="chartTrend"></canvas>
+        <pre id="outputTrend"></pre>
+        <div class="explanation" id="explanationTrend"></div>
+    </div>
+
+    <script>
+        const baseURL = 'https://erosion-ai.tavenel.fr/aipredictions/project/time-series/';
+        const directories = {
+            mex: { prefix: 'mex', maxIndex: 100 },
+            usa_CA: { prefix: 'usa_CA_', maxIndex: 309 }
+        };
+        let chart1 = null;
+        let chart2 = null;
+        let chart3 = null;
+        let chartRandomFiles = null;
+        let chartShoreline = null;
+        let chartTrend = null;
+
+        const colors = [
+            'rgba(75, 192, 192, 1)', 
+            'rgba(75, 75, 192, 1)', 
+            'rgba(192, 192, 75, 1)', 
+            'rgba(75, 192, 75, 1)', 
+            'rgba(192, 75, 192, 1)', 
+            'rgba(75, 75, 75, 1)', 
+            'rgba(75, 192, 192, 0.7)', 
+            'rgba(192, 192, 192, 1)'
+        ];
+
+        const sampleData = [
+            { date: '2023-01-01', value: 10 },
+            { date: '2023-01-02', value: 12 },
+            { date: '2023-01-03', value: null },
+            { date: '2023-01-04', value: 14 },
+            { date: '2023-01-05', value: null },
+            { date: '2023-01-06', value: 16 },
+            { date: '2023-01-07', value: 18 }
+        ];
+
+        let predictionMode = 'both'; // Default mode
+
+        function setPredictionMode(mode) {
+            predictionMode = mode;
+        }
+
+        function toggleInfoPopup() {
+            const popup = document.getElementById('info-popup');
+            popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function toggleTrendInfoPopup() {
+            const popup = document.getElementById('trend-info-popup');
+            popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function toggleShorelineInfoPopup() {
+            const popup = document.getElementById('shoreline-info-popup');
+            popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function performMovingAverageFromExample() {
+            const windowSize = 3;
+            const movingAverageData = sampleData.map((data, index, array) => {
+                const window = array.slice(Math.max(index - Math.floor(windowSize / 2), 0), index + Math.ceil(windowSize / 2));
+                const validValues = window.map(d => d.value).filter(v => v !== null);
+                const average = validValues.reduce((sum, v) => sum + v, 0) / validValues.length;
+                return { date: data.date, value: data.value === null ? average : data.value, movingAverage: average };
+            });
+
+            const ctx = document.getElementById('chartMovingAverage').getContext('2d');
+            if (chart1) chart1.destroy();
+            chart1 = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: sampleData.map(d => d.date),
+                    datasets: [
+                        {
+                            label: 'Original Data',
+                            data: sampleData.map(d => d.value),
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            fill: false
+                        },
+                        {
+                            label: 'Moving Average',
+                            data: movingAverageData.map(d => d.movingAverage),
+                            borderColor: 'rgba(192, 75, 75, 1)',
+                            fill: false,
+                            borderDash: [5, 5] // Dashed line for the moving average
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        x: { 
+                            type: 'time', 
+                            time: { unit: 'day' },
+                            adapters: { 
+                                date: luxon.DateTime
+                            }
+                        },
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+
+            document.getElementById('outputMovingAverage').textContent = JSON.stringify(movingAverageData, null, 2);
+            document.getElementById('explanationMovingAverage').textContent = `
+                The blue line represents the original data. The gaps in the blue line indicate missing values in the dataset.
+                The red dashed line is the moving average, which provides a smoothed version of the data by averaging the values within a sliding window.
+                Where the blue line stops, the moving average continues, using available data to estimate the missing values.
+            `;
+        }
+
+        function performLinearInterpolationFromExample() {
+            const interpolate = (y0, y1, x0, x1, x) => y0 + ((y1 - y0) * (x - x0)) / (x1 - x0);
+
+            const interpolatedData = sampleData.map((data, index, array) => {
+                if (data.value !== null) return data;
+
+                let prev = array.slice(0, index).reverse().find(d => d.value !== null);
+                let next = array.slice(index + 1).find(d => d.value !== null);
+                if (!prev || !next) return data;
+
+                const interpolatedValue = interpolate(prev.value, next.value, new Date(prev.date).getTime(), new Date(next.date).getTime(), new Date(data.date).getTime());
+                return { ...data, value: interpolatedValue };
+            });
+
+            const ctx = document.getElementById('chartLinearInterpolation').getContext('2d');
+            if (chart2) chart2.destroy();
+            chart2 = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: sampleData.map(d => d.date),
+                    datasets: [
+                        {
+                            label: 'Original Data',
+                            data: sampleData.map(d => d.value),
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            fill: false
+                        },
+                        {
+                            label: 'Interpolated Data',
+                            data: interpolatedData.map(d => d.value),
+                            borderColor: 'rgba(192, 75, 75, 1)',
+                            fill: false,
+                            borderDash: [5, 5] // Dashed line for the interpolated data
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        x: { 
+                            type: 'time', 
+                            time: { unit: 'day' },
+                            adapters: { 
+                                date: luxon.DateTime
+                            }
+                        },
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+
+            document.getElementById('outputLinearInterpolation').textContent = JSON.stringify(interpolatedData, null, 2);
+            document.getElementById('explanationLinearInterpolation').textContent = `
+                The blue line represents the original data. The gaps in the blue line indicate missing values in the dataset.
+                The red dashed line is the interpolated data, which fills in the gaps by drawing straight lines between known points.
+                This method provides a simple way to estimate missing values by assuming a linear change between known values.
+            `;
+        }
+
+        function applyExponentialSmoothingFromExample() {
+            const alpha = 0.5;
+            let smoothedData = [];
+            sampleData.forEach((data, index) => {
+                if (index === 0) {
+                    smoothedData.push(data.value);
+                } else {
+                    const prevSmoothed = smoothedData[smoothedData.length - 1];
+                    const currentValue = data.value === null ? prevSmoothed : data.value;
+                    const smoothedValue = alpha * currentValue + (1 - alpha) * prevSmoothed;
+                    smoothedData.push(smoothedValue);
+                }
+            });
+
+            const ctx = document.getElementById('chartExponentialSmoothing').getContext('2d');
+            if (chart3) chart3.destroy();
+            chart3 = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: sampleData.map(d => d.date),
+                    datasets: [
+                        {
+                            label: 'Original Data',
+                            data: sampleData.map(d => d.value),
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            fill: false
+                        },
+                        {
+                            label: 'Smoothed Data',
+                            data: smoothedData,
+                            borderColor: 'rgba(192, 75, 75, 1)',
+                            fill: false,
+                            borderDash: [5, 5] // Dashed line for the smoothed data
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        x: { 
+                            type: 'time', 
+                            time: { unit: 'day' },
+                            adapters: { 
+                                date: luxon.DateTime
+                            }
+                        },
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+
+            const outputData = sampleData.map((d, i) => ({ ...d, smoothedValue: smoothedData[i] }));
+            document.getElementById('outputExponentialSmoothing').textContent = JSON.stringify(outputData, null, 2);
+            document.getElementById('explanationExponentialSmoothing').textContent = `
+                The blue line represents the original data. The gaps in the blue line indicate missing values in the dataset.
+                The red dashed line is the smoothed data, which uses exponential smoothing to estimate missing values and smooth out fluctuations.
+                This method gives more weight to recent observations, providing a better estimate for the most recent data points.
+            `;
+        }
+
+        async function loadRandomFilesAndApplyMethod() {
+            const directory = 'mex'; // Example directory
+            const numFiles = 10;
+            const method = document.getElementById('method-select').value;
+            const windowSize = parseInt(document.getElementById('window-size').value, 10);
+            const files = getRandomFiles(directory, numFiles);
+            let fileDetails = '';
+            let allProcessedData = [];
+            let datasets = [];
+            let colorIndex = 0;
+
+            for (const file of files) {
+                try {
+                    const response = await fetch(baseURL + file);
+                    if (response.status === 404) {
+                        console.log(`File not found: ${file}`);
+                        continue;
+                    }
+                    const text = await response.text();
+                    const parsedData = parseCSV(text);
+                    let processedData;
+                    switch (method) {
+                        case 'movingAverage':
+                            processedData = calculateMovingAverageForRandomFiles(parsedData, windowSize);
+                            break;
+                        case 'linearInterpolation':
+                            processedData = performLinearInterpolationForRandomFiles(parsedData);
+                            break;
+                        case 'exponentialSmoothing':
+                            processedData = applyExponentialSmoothingForRandomFiles(parsedData);
+                            break;
+                    }
+
+                    // Add future predictions
+                    const lastDate = new Date(parsedData[parsedData.length - 1].Date);
+                    const futureDates = generateFutureDates(lastDate, 2030);
+                    const futurePredictions = futureDates.map(date => {
+                        const value = predictFutureValue(processedData, method, windowSize);
+                        return { Date: date.toISOString().split('T')[0], Distance: value };
+                    });
+                    processedData.push(...futurePredictions);
+
+                    allProcessedData.push(...processedData);
+                    const color = colors[colorIndex % colors.length];
+                    colorIndex++;
+
+                    // Create dataset for combined data
+                    const combinedData = processedData.map(d => ({
+                        x: d.Date,
+                        y: d.Distance === 'None' ? d.processedValue : parseFloat(d.Distance),
+                        isPredicted: d.Distance === 'None'
+                    }));
+
+                    datasets.push({
+                        label: `Data - ${file}`,
+                        data: combinedData,
+                        borderColor: color,
+                        backgroundColor: color,
+                        fill: false,
+                        showLine: true,
+                        pointRadius: 2,
+                        pointHoverRadius: 5,
+                        borderDash: []
+                    });
+
+                    // Create a dataset for predicted points only
+                    const predictedData = combinedData.filter(d => d.isPredicted);
+
+                    datasets.push({
+                        label: `Predicted Data - ${file}`,
+                        data: predictedData,
+                        borderColor: 'rgba(255, 0, 0, 1)',
+                        backgroundColor: 'rgba(255, 0, 0, 1)',
+                        fill: false,
+                        showLine: true,
+                        pointRadius: 5,
+                        pointHoverRadius: 5,
+                        borderDash: [5, 5] // Dashed line for predicted data
+                    });
+
+                    // Add table details with improved CSS
+                    fileDetails += `
+                        <div class="file-details">
+                            <h3>File: ${file}</h3>
+                            <table class="styled-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Value</th>
+                                        <th>Predicted Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+                    processedData.forEach(row => {
+                        if (row.Distance === 'None') {
+                            fileDetails += `
+                                <tr>
+                                    <td>${row.Date}</td>
+                                    <td>None</td>
+                                    <td>${row.processedValue}</td>
+                                </tr>
+                            `;
+                        }
+                    });
+                    fileDetails += `
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+
+                    document.getElementById('outputRandomFiles').innerHTML = fileDetails;
+
+                } catch (error) {
+                    console.log(`Error fetching file: ${file}, ${error}`);
+                }
+            }
+
+            document.getElementById('outputRandomFiles').innerHTML = fileDetails;
+
+            const ctx = document.getElementById('chartRandomFiles').getContext('2d');
+            if (chartRandomFiles) chartRandomFiles.destroy();
+            chartRandomFiles = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: datasets
+                },
+                options: {
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: { unit: 'day' },
+                            adapters: { date: luxon.DateTime }
+                        },
+                        y: { beginAtZero: true }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.raw.isPredicted) {
+                                        label += `Predicted Value: ${context.raw.y}`;
+                                    } else {
+                                        label += `Value: ${context.raw.y}`;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function loadShorelineFilesAndApplyMethod() {
+            const directory = 'mex0013'; // Shoreline directory
+            const numFiles = 15;
+            const method = document.getElementById('shoreline-method-select').value;
+            const windowSize = parseInt(document.getElementById('shoreline-window-size').value, 10);
+            const files = getShorelineFiles(directory, numFiles);
+            let fileDetails = '';
+            let allProcessedData = [];
+            let datasets = [];
+            let colorIndex = 0;
+
+            for (const file of files) {
+                try {
+                    const response = await fetch(baseURL + file);
+                    if (response.status === 404) {
+                        console.log(`File not found: ${file}`);
+                        continue;
+                    }
+                    const text = await response.text();
+                    const parsedData = parseCSV(text);
+                    let processedData;
+                    switch (method) {
+                        case 'movingAverage':
+                            processedData = calculateMovingAverageForRandomFiles(parsedData, windowSize);
+                            break;
+                        case 'linearInterpolation':
+                            processedData = performLinearInterpolationForRandomFiles(parsedData);
+                            break;
+                        case 'exponentialSmoothing':
+                            processedData = applyExponentialSmoothingForRandomFiles(parsedData);
+                            break;
+                    }
+
+                    // Add future predictions
+                    const lastDate = new Date(parsedData[parsedData.length - 1].Date);
+                    const futureDates = generateFutureDates(lastDate, 2030);
+                    const futurePredictions = futureDates.map(date => {
+                        const value = predictFutureValue(processedData, method, windowSize);
+                        return { Date: date.toISOString().split('T')[0], Distance: value };
+                    });
+                    processedData.push(...futurePredictions);
+
+                    allProcessedData.push(...processedData);
+                    const color = colors[colorIndex % colors.length];
+                    colorIndex++;
+
+                    // Create dataset for combined data
+                    const combinedData = processedData.map(d => ({
+                        x: d.Date,
+                        y: d.Distance === 'None' ? d.processedValue : parseFloat(d.Distance),
+                        isPredicted: d.Distance === 'None'
+                    }));
+
+                    datasets.push({
+                        label: `Data - ${file}`,
+                        data: combinedData,
+                        borderColor: color,
+                        backgroundColor: color,
+                        fill: false,
+                        showLine: true,
+                        pointRadius: 2,
+                        pointHoverRadius: 5,
+                        borderDash: []
+                    });
+
+                    // Create a dataset for predicted points only
+                    const predictedData = combinedData.filter(d => d.isPredicted);
+
+                    datasets.push({
+                        label: `Predicted Data - ${file}`,
+                        data: predictedData,
+                        borderColor: 'rgba(255, 0, 0, 1)',
+                        backgroundColor: 'rgba(255, 0, 0, 1)',
+                        fill: false,
+                        showLine: true,
+                        pointRadius: 5,
+                        pointHoverRadius: 5,
+                        borderDash: [5, 5] // Dashed line for predicted data
+                    });
+
+                    // Add table details with improved CSS
+                    fileDetails += `
+                        <div class="file-details">
+                            <h3>File: ${file}</h3>
+                            <table class="styled-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Value</th>
+                                        <th>Predicted Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+                    processedData.forEach(row => {
+                        if (row.Distance === 'None') {
+                            fileDetails += `
+                                <tr>
+                                    <td>${row.Date}</td>
+                                    <td>None</td>
+                                    <td>${row.processedValue}</td>
+                                </tr>
+                            `;
+                        }
+                    });
+                    fileDetails += `
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+
+                    document.getElementById('outputShoreline').innerHTML = fileDetails;
+
+                } catch (error) {
+                    console.log(`Error fetching file: ${file}, ${error}`);
+                }
+            }
+
+            document.getElementById('outputShoreline').innerHTML = fileDetails;
+
+            const ctx = document.getElementById('chartShoreline').getContext('2d');
+            if (chartShoreline) chartShoreline.destroy();
+            chartShoreline = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: datasets
+                },
+                options: {
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: { unit: 'day' },
+                            adapters: { date: luxon.DateTime }
+                        },
+                        y: { beginAtZero: true }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.raw.isPredicted) {
+                                        label += `Predicted Value: ${context.raw.y}`;
+                                    } else {
+                                        label += `Value: ${context.raw.y}`;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function calculateMovingAverageForRandomFiles(data, windowSize) {
+            return data.map((data, index, array) => {
+                if (data.Distance !== 'None') {
+                    return { ...data, processedValue: parseFloat(data.Distance) };
+                }
+
+                const start = Math.max(index - windowSize, 0);
+                const end = Math.min(index + windowSize, array.length - 1);
+                const window = array.slice(start, end + 1);
+                const validValues = window.map(d => d.Distance).filter(v => v !== 'None').map(v => parseFloat(v));
+                const average = validValues.reduce((sum, v) => sum + v, 0) / validValues.length;
+
+                return { ...data, processedValue: average };
+            });
+        }
+
+        function performLinearInterpolationForRandomFiles(data) {
+            const interpolate = (y0, y1, x0, x1, x) => y0 + ((y1 - y0) * (x - x0)) / (x1 - x0);
+
+            return data.map((data, index, array) => {
+                if (data.Distance !== 'None') return { ...data, processedValue: parseFloat(data.Distance) };
+
+                let prevValues = array.slice(Math.max(0, index - 10), index).filter(d => d.Distance !== 'None');
+                let nextValues = array.slice(index + 1, Math.min(array.length, index + 11)).filter(d => d.Distance !== 'None');
+
+                if (prevValues.length === 0 || nextValues.length === 0) return { ...data, processedValue: null };
+
+                let prev = prevValues[prevValues.length - 1];
+                let next = nextValues[0];
+
+                const interpolatedValue = interpolate(
+                    parseFloat(prev.Distance), 
+                    parseFloat(next.Distance), 
+                    new Date(prev.Date).getTime(), 
+                    new Date(next.Date).getTime(), 
+                    new Date(data.Date).getTime()
+                );
+                return { ...data, processedValue: interpolatedValue };
+            });
+        }
+
+        function applyExponentialSmoothingForRandomFiles(data) {
+            const alpha = 0.5;
+            let smoothedData = [];
+
+            data.forEach((data, index) => {
+                if (index === 0) {
+                    smoothedData.push(parseFloat(data.Distance));
+                } else {
+                    const prevSmoothed = smoothedData[smoothedData.length - 1];
+                    const currentValue = data.Distance === 'None' ? prevSmoothed : parseFloat(data.Distance);
+                    const smoothedValue = alpha * currentValue + (1 - alpha) * prevSmoothed;
+                    smoothedData.push(smoothedValue);
+                }
+            });
+
+            return data.map((d, i) => ({ ...d, processedValue: smoothedData[i] }));
+        }
+
+        function parseCSV(text) {
+            const lines = text.split('\n');
+            const result = [];
+            const headers = lines[0].split(',');
+
+            for (let i = 1; i < lines.length; i++) {
+                const currentline = lines[i].split(',');
+                if (currentline.length === headers.length && currentline.every(cell => cell.trim() !== '')) {
+                    const obj = {};
+                    for (let j = 0; j < headers.length; j++) {
+                        obj[headers[j].trim()] = currentline[j] ? currentline[j].trim() : 'None';
+                    }
+                    result.push(obj);
+                }
+            }
+            return result;
+        }
+
+        function getRandomFiles(directory, numFiles) {
+            const files = [];
+            const { prefix, maxIndex } = directories[directory];
+            while (files.length < numFiles) {
+                const folderIndex = Math.floor(Math.random() * (maxIndex + 1));
+                const fileIndex = Math.floor(Math.random() * 100);
+                const folder = `${prefix}${String(folderIndex).padStart(4, '0')}`;
+                const filePath = directory === 'usa_CA'
+                    ? `${folder}/${folder}-${String(fileIndex).padStart(4, '0')}.csv`
+                    : `${prefix}${String(folderIndex).padStart(4, '0')}/${prefix}${String(folderIndex).padStart(4, '0')}-${String(fileIndex).padStart(4, '0')}.csv`;
+                if (!files.includes(filePath)) {
+                    files.push(filePath);
+                }
+            }
+            return files;
+        }
+
+        function getShorelineFiles(directory, numFiles) {
+            const files = [];
+            for (let i = 0; i < numFiles; i++) {
+                files.push(`${directory}/${directory}-${String(i).padStart(4, '0')}.csv`);
+            }
+            return files;
+        }
+
+        function generateFutureDates(lastDate, targetYear) {
+            const dates = [];
+            let currentDate = new Date(lastDate);
+            while (currentDate.getFullYear() <= targetYear) {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                dates.push(new Date(currentDate));
+            }
+            return dates;
+        }
+
+        function generatePastDates(firstDate, targetYear) {
+            const dates = [];
+            let currentDate = new Date(firstDate);
+            while (currentDate.getFullYear() >= targetYear) {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                dates.push(new Date(currentDate));
+            }
+            return dates.reverse();
+        }
+
+        function predictFutureValue(data, method, windowSize) {
+            switch (method) {
+                case 'movingAverage':
+                    const recentData = data.slice(-windowSize).map(d => d.processedValue || d.Distance);
+                    return recentData.reduce((sum, value) => sum + value, 0) / recentData.length;
+                case 'linearInterpolation':
+                    const lastValue = data[data.length - 1].processedValue || data[data.length - 1].Distance;
+                    const secondLastValue = data[data.length - 2].processedValue || data[data.length - 2].Distance;
+                    return lastValue + (lastValue - secondLastValue);
+                case 'exponentialSmoothing':
+                    const alpha = 0.5;
+                    const prevSmoothed = data[data.length - 1].processedValue || data[data.length - 1].Distance;
+                    const currentValue = data[data.length - 2].processedValue || data[data.length - 2].Distance;
+                    return alpha * currentValue + (1 - alpha) * prevSmoothed;
+                default:
+                    return null;
+            }
+        }
+
+        function calculateTrend(data) {
+            // Convert date strings to Date objects and calculate x-values for linear regression
+            const dates = data.map(point => ({
+                x: new Date(point.Date).getTime(),
+                y: point.Distance === 'None' ? null : parseFloat(point.Distance)
+            }));
+
+            const n = dates.filter(point => point.y !== null).length;
+            const sumX = dates.reduce((sum, point) => sum + point.x, 0);
+            const sumY = dates.filter(point => point.y !== null).reduce((sum, point) => sum + point.y, 0);
+            const sumXY = dates.filter(point => point.y !== null).reduce((sum, point) => sum + point.x * point.y, 0);
+            const sumXX = dates.filter(point => point.y !== null).reduce((sum, point) => sum + point.x * point.x, 0);
+
+            const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+            const intercept = (sumY - slope * sumX) / n;
+
+            const lastDate = new Date(data[data.length - 1].Date);
+            const futureDates = generateFutureDates(lastDate, 2030);
+            const futurePredictions = futureDates.map(date => {
+                const x = date.getTime();
+                const value = slope * x + intercept;
+                return { Date: date.toISOString().split('T')[0], Distance: value };
+            });
+
+            return data.concat(futurePredictions);
+        }
+
+        function performTrendAnalysis() {
+    const input = document.getElementById('csvFileInput');
+    if (!input.files || !input.files[0]) {
+        alert('Please select a CSV file first');
+        return;
+    }
+
+    const file = input.files[0];
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        const text = e.target.result;
+        const parsedData = parseCSV(text);
+        const trendMethod = document.getElementById('trend-method-select').value;
+        const fillMethod = document.getElementById('trend-filled-method-select').value;
+        const windowSize = parseInt(document.getElementById('trend-window-size-select').value, 10);
+        const seasonalPeriod = parseInt(document.getElementById('seasonal-period-select').value, 10); // Ajout de la période saisonnière
+        const predictionMode = document.getElementById('prediction-mode-select').value; // Get the prediction mode
+        let filledData;
+
+        switch (fillMethod) {
+            case 'movingAverage':
+                filledData = calculateMovingAverageForRandomFiles(parsedData, windowSize);
+                break;
+            case 'linearInterpolation':
+                filledData = performLinearInterpolationForRandomFiles(parsedData);
+                break;
+            case 'exponentialSmoothing':
+                filledData = applyExponentialSmoothingForRandomFiles(parsedData);
+                break;
+        }
+
+        let trendData = [];
+        console.log("predictionMode");
+
+        console.log(predictionMode);
+
+        switch (trendMethod) {
+            case 'naive':
+                trendData = naiveForecast(filledData, predictionMode);
+                break;
+            case 'snaive':
+                trendData = snaiveForecast(filledData, predictionMode);
+                break;
+            case 'seasonaldecomposition':
+                trendData = seasonalDecompositionForecast(filledData, predictionMode);
+                break;
+            case 'statespacemodelforecast':
+                trendData = stateSpaceModelForecast(filledData, predictionMode);
+                break;
+            case 'holtWintersForecast':
+                trendData = holtWintersForecast(filledData, seasonalPeriod, predictionMode); // Passer la période saisonnière et mode de prédiction
+                break;
+        }
+
+        const ctx = document.getElementById('chartTrend').getContext('2d');
+        if (chartTrend) chartTrend.destroy();
+        chartTrend = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: trendData.map(d => d.Date),
+                datasets: [
+                    {
+                        label: 'Original Data',
+                        data: parsedData.map(d => ({ x: d.Date, y: d.Distance })),
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        fill: false
+                    },
+                    {
+                        label: 'Filled Data',
+                        data: filledData.map(d => ({ x: d.Date, y: d.processedValue })),
+                        borderColor: 'rgba(192, 75, 75, 1)',
+                        fill: false
+                    },
+                    {
+                        label: 'Forecasted Data',
+                        data: trendData.map(d => ({ x: d.Date, y: d.Distance })),
+                        borderColor: 'rgba(75, 75, 192, 1)',
+                        fill: false,
+                        borderDash: [5, 5] // Dashed line for the forecasted data
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: { unit: 'day' },
+                        adapters: { date: luxon.DateTime }
+                    },
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        document.getElementById('outputTrend').textContent = JSON.stringify(trendData, null, 2);
+        document.getElementById('explanationTrend').textContent = `
+            The blue line represents the original data. The red line is the filled data, which shows the values that were filled based on the selected method.
+            The purple dashed line is the forecasted data, which shows the predicted values based on the selected forecasting method.
+        `;
+    };
+    reader.readAsText(file);
+}
+
+
+            
+        function naiveForecast(data, predictionMode) {
+            const lastValue = data[data.length - 1].Distance;
+            console.log(predictionMode)
+            const pastDates = (predictionMode === 'past' || predictionMode === 'both') ? generatePastDates(new Date(data[0].Date), 1970) : [];
+            const futureDates = (predictionMode === 'future' || predictionMode === 'both') ? generateFutureDates(new Date(data[data.length - 1].Date), 2030) : [];
+
+            console.log("pastDates")
+            console.log(pastDates)
+            console.log("futureDates")
+            console.log(futureDates)
+            
+            const pastPredictions = pastDates.map(date => ({ Date: date.toISOString().split('T')[0], Distance: lastValue }));
+            const futurePredictions = futureDates.map(date => ({ Date: date.toISOString().split('T')[0], Distance: lastValue }));
+            
+            return pastPredictions.concat(data).concat(futurePredictions);
+        }
+
+        function snaiveForecast(data, predictionMode) {
+            const lastSeason = data.slice(-12); // Assuming monthly data for one year
+            const pastDates = (predictionMode === 'past' || predictionMode === 'both') ? generatePastDates(new Date(data[0].Date), 1970) : [];
+            const futureDates = (predictionMode === 'future' || predictionMode === 'both') ? generateFutureDates(new Date(data[data.length - 1].Date), 2030) : [];
+
+            console.log("pastDates")
+            console.log(pastDates)
+            console.log("futureDates")
+            console.log(futureDates)
+            
+            const pastPredictions = pastDates.map((date, index) => ({
+                Date: date.toISOString().split('T')[0],
+                Distance: lastSeason[(index + 1) % 12].Distance
+            }));
+            
+            const futurePredictions = futureDates.map((date, index) => ({
+                Date: date.toISOString().split('T')[0],
+                Distance: lastSeason[index % 12].Distance
+            }));
+            
+            return pastPredictions.concat(data).concat(futurePredictions);
+        }
+
+        function seasonalDecompositionForecast(data, predictionMode) {
+            const period = 12; // Assuming monthly data with yearly seasonality
+            const trend = [];
+            const seasonal = [];
+            const residual = [];
+            const dates = data.map(d => new Date(d.Date));
+            const values = data.map(d => d.Distance === null ? null : parseFloat(d.Distance));
+
+            console.log("Values:", values);
+
+            // Split data into historical and current
+            const splitIndex = Math.floor(values.length / 2);
+            const historicalData = values.slice(0, splitIndex).filter(v => v !== null);
+            const currentData = values.slice(splitIndex).filter(v => v !== null);
+
+            console.log("Historical Data:", historicalData);
+            console.log("Current Data:", currentData);
+
+            // Calculate average trends
+            const historicalTrend = calculateMovingAverage(historicalData, period);
+            const currentTrend = calculateMovingAverage(currentData, period);
+
+            console.log("Historical Trend:", historicalTrend);
+            console.log("Current Trend:", currentTrend);
+
+            // Calculate the trend component using a simple moving average
+            for (let i = 0; i < values.length; i++) {
+                if (values[i] === null || i < Math.floor(period / 2) || i >= values.length - Math.floor(period / 2)) {
+                    trend.push(null);
+                } else {
+                    let sum = 0;
+                    let count = 0;
+                    for (let j = -Math.floor(period / 2); j <= Math.floor(period / 2); j++) {
+                        if (values[i + j] !== null) {
+                            sum += values[i + j];
+                            count++;
+                        }
+                    }
+                    trend.push(sum / count);
+                }
+            }
+
+            console.log("Trend:", trend);
+
+            // Calculate the seasonal component
+            for (let i = 0; i < period; i++) {
+                let sum = 0;
+                let count = 0;
+                for (let j = i; j < values.length; j += period) {
+                    if (trend[j] !== null && !isNaN(values[j] - trend[j])) {
+                        sum += values[j] - trend[j];
+                        count++;
+                    }
+                }
+                if (count > 0) {
+                    seasonal.push(sum / count);
+                } else {
+                    seasonal.push(0); // Replace NaN with 0 to avoid NaN values in seasonal component
+                }
+            }
+
+            console.log("Seasonal Component:", seasonal);
+
+            // Extend seasonal component to the length of the data
+            const extendedSeasonal = [];
+            for (let i = 0; i < values.length; i++) {
+                extendedSeasonal.push(seasonal[i % period]);
+            }
+
+            console.log("Extended Seasonal:", extendedSeasonal);
+
+            // Calculate the residual component
+            for (let i = 0; i < values.length; i++) {
+                if (trend[i] !== null && extendedSeasonal[i] !== null && !isNaN(values[i])) {
+                    residual.push(values[i] - trend[i] - extendedSeasonal[i]);
+                } else {
+                    residual.push(null);
+                }
+            }
+
+            console.log("Residual:", residual);
+
+            // Combine the components back into the data
+            const decomposedData = data.map((d, i) => ({
+                Date: d.Date,
+                Distance: values[i],
+                trend: trend[i],
+                seasonal: extendedSeasonal[i],
+                residual: residual[i]
+            }));
+
+            console.log("Decomposed Data:", decomposedData);
+
+            // Generate past predictions
+            const pastDates = (predictionMode === 'past' || predictionMode === 'both') ? generatePastDates(new Date(data[0].Date), 1970) : [];
+            const futureDates = (predictionMode === 'future' || predictionMode === 'both') ? generateFutureDates(new Date(data[data.length - 1].Date), 2030) : [];
+
+            console.log("Past Dates:", pastDates);
+            console.log("Future Dates:", futureDates);
+
+            // Past predictions based on historical trend
+            const pastPredictions = pastDates.map((date, index) => {
+                const seasonalIndex = index % period;
+                const trendIndex = historicalData.length - 1 - (index % historicalData.length);
+                console.log(`Past Prediction Index: ${index}, Seasonal Index: ${seasonalIndex}, Trend Index: ${trendIndex}`);
+                if (isNaN(historicalTrend[trendIndex]) || isNaN(extendedSeasonal[seasonalIndex])) {
+                    return {
+                        Date: date.toISOString().split('T')[0],
+                        Distance: null
+                    };
+                }
+                return {
+                    Date: date.toISOString().split('T')[0],
+                    Distance: historicalTrend[trendIndex] - ((historicalData.length - index) / 10) + extendedSeasonal[seasonalIndex]
+                };
+            });
+
+            console.log("Past Predictions:", pastPredictions);
+
+            // Future predictions based on current trend
+            const futurePredictions = futureDates.map((date, index) => {
+                const seasonalIndex = index % period;
+                console.log(`Future Prediction Index: ${index}, Seasonal Index: ${seasonalIndex}`);
+                if (isNaN(currentTrend[index % currentData.length]) || isNaN(extendedSeasonal[seasonalIndex])) {
+                    return {
+                        Date: date.toISOString().split('T')[0],
+                        Distance: null
+                    };
+                }
+                return {
+                    Date: date.toISOString().split('T')[0],
+                    Distance: currentTrend[index % currentData.length] + ((index + 1) / 10) + extendedSeasonal[seasonalIndex]
+                };
+            });
+
+            console.log("Future Predictions:", futurePredictions);
+
+            return pastPredictions.concat(decomposedData).concat(futurePredictions);
+        }
+
+        function calculateMovingAverage(data, period) {
+            const movingAverage = [];
+            for (let i = 0; i < data.length; i++) {
+                if (i < period) {
+                    movingAverage.push(data[i]);
+                } else {
+                    let sum = 0;
+                    for (let j = i - period; j < i; j++) {
+                        sum += data[j];
+                    }
+                    movingAverage.push(sum / period);
+                }
+            }
+            return movingAverage;
+        }
+
+        function stateSpaceModelForecast(data, predictionMode) {
+            const alpha = 0.5; // Observation noise coefficient
+            const beta = 0.5; // State noise coefficient
+            let stateEstimate = data[0].Distance !== "None" ? parseFloat(data[0].Distance) : 0; // Initial state estimate
+
+            const smoothedData = data.map((d, i) => {
+                if (d.Distance !== "None") {
+                    const observation = parseFloat(d.Distance);
+                    stateEstimate = alpha * observation + (1 - alpha) * stateEstimate; // Update state estimate with observation
+                    return { ...d, processedValue: stateEstimate };
+                } else {
+                    stateEstimate = beta * stateEstimate; // Predict next state
+                    return { ...d, processedValue: stateEstimate };
+                }
+            });
+
+            const pastDates = (predictionMode === 'past' || predictionMode === 'both') ? generatePastDates(new Date(data[0].Date), 1970) : [];
+            const futureDates = (predictionMode === 'future' || predictionMode === 'both') ? generateFutureDates(new Date(data[data.length - 1].Date), 2030) : [];
+
+            console.log("pastDates")
+            console.log(pastDates)
+            console.log("futureDates")
+            console.log(futureDates)
+            
+            const pastPredictions = pastDates.map(date => {
+                stateEstimate = beta * stateEstimate; // Predict previous state
+                return { Date: date.toISOString().split('T')[0], Distance: stateEstimate };
+            }).reverse();
+            
+            const futurePredictions = futureDates.map(date => {
+                stateEstimate = beta * stateEstimate; // Predict next state
+                return { Date: date.toISOString().split('T')[0], Distance: stateEstimate };
+            });
+
+            return pastPredictions.concat(smoothedData).concat(futurePredictions);
+        }
+
+        
+        function holtWintersForecast(data, seasonalPeriod) {
+    const alpha = 0.05; // Reduced smoothing factor for level
+    const beta = 0.02;  // Reduced smoothing factor for trend
+    const gamma = 0.1; // Reduced smoothing factor for seasonality
+
+    let level, trend, seasonal = [];
+    let forecast = [];
+
+    // Split data into historical and current
+    const splitIndex = Math.floor(data.length / 2);
+    const historicalData = data.slice(0, splitIndex);
+    const currentData = data.slice(splitIndex);
+
+    console.log("Historical Data:", historicalData);
+    console.log("Current Data:", currentData);
+
+    // Initialize level, trend, and seasonal components for historical data
+    let initialLevelSum = 0;
+    let count = 0;
+    for (let i = 0; i < seasonalPeriod; i++) {
+        if (historicalData[i].Distance !== null && !isNaN(historicalData[i].Distance)) {
+            initialLevelSum += parseFloat(historicalData[i].Distance);
+            count++;
+        }
+    }
+    level = initialLevelSum / count;
+    
+    // Calculate trend based on the average change between the initial values
+    let initialTrendSum = 0;
+    for (let i = 1; i < seasonalPeriod; i++) {
+        if (historicalData[i].Distance !== null && !isNaN(historicalData[i].Distance) && historicalData[i-1].Distance !== null && !isNaN(historicalData[i-1].Distance)) {
+            initialTrendSum += (parseFloat(historicalData[i].Distance) - parseFloat(historicalData[i-1].Distance));
+        }
+    }
+    trend = initialTrendSum / (count - 1);
+
+    for (let i = 0; i < seasonalPeriod; i++) {
+        seasonal.push((historicalData[i].Distance !== null && !isNaN(historicalData[i].Distance)) ? parseFloat(historicalData[i].Distance) - level : 0);
+    }
+
+    console.log("Initial Level:", level);
+    console.log("Initial Trend:", trend);
+    console.log("Initial Seasonal:", seasonal);
+
+    // Holt-Winters calculation for historical data
+    for (let i = 0; i < historicalData.length; i++) {
+        const observed = (historicalData[i].Distance !== null && !isNaN(historicalData[i].Distance)) ? parseFloat(historicalData[i].Distance) : (level + trend + seasonal[i % seasonalPeriod]);
+        const prevLevel = level;
+        level = alpha * (observed - seasonal[i % seasonalPeriod]) + (1 - alpha) * (level + trend);
+        trend = beta * (level - prevLevel) + (1 - beta) * trend;
+        seasonal[i % seasonalPeriod] = gamma * (observed - level) + (1 - gamma) * seasonal[i % seasonalPeriod];
+        const processedValue = level + trend + seasonal[i % seasonalPeriod];
+        historicalData[i].processedValue = processedValue;
+        console.log(`Historical Step ${i}: level=${level}, trend=${trend}, seasonal=${seasonal[i % seasonalPeriod]}, observed=${observed}, processed=${processedValue}`);
+    }
+
+    // Adjust the trend for past forecasts based on the duration and value difference
+    const firstDate = new Date(data[0].Date);
+    const splitDate = new Date(historicalData[historicalData.length - 1].Date);
+    const yearsBetween1970AndFirstDate = (splitDate.getFullYear() - 1970);
+    const yearsBetweenFirstDateAndSplitDate = (splitDate.getFullYear() - firstDate.getFullYear());
+
+    // Calculate the trend adjustment factor
+    const trendAdjustmentFactor = yearsBetween1970AndFirstDate / yearsBetweenFirstDateAndSplitDate;
+
+    console.log("Trend Adjustment Factor:", trendAdjustmentFactor);
+
+    // Calculate min and max values from historical data
+    const historicalMin = Math.min(...historicalData.map(d => d.Distance !== null ? d.Distance : Infinity));
+    const historicalMax = Math.max(...historicalData.map(d => d.Distance !== null ? d.Distance : -Infinity));
+
+    // Generate future forecasts until 2030 based on current data
+    let lastLevel = level;
+    let lastTrend = trend;
+    const lastDate = new Date(currentData[currentData.length - 1].Date);
+    const targetYear = 2030;
+    let currentDate = new Date(lastDate);
+
+    while (currentDate.getFullYear() <= targetYear) {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        const seasonalIndex = (currentData.length + forecast.length) % seasonalPeriod;
+        const forecastedValue = lastLevel + (forecast.length + 1) * lastTrend + seasonal[seasonalIndex];
+        forecast.push({
+            Date: currentDate.toISOString().split('T')[0],
+            Distance: forecastedValue
+        });
+        console.log(`Future prediction for ${currentDate.toISOString().split('T')[0]}: ${forecastedValue}`);
+    }
+
+    // First pass for past forecasts until 1970 based on historical data
+    currentDate = new Date(firstDate);
+    let pastForecast = [];
+    let pastValuesSum = 0;
+    let pastValuesCount = 0;
+
+    while (currentDate.getFullYear() >= 1970) {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        const seasonalIndex = (historicalData.length - pastForecast.length - 1) % seasonalPeriod;
+        
+        // Calculate the forecasted value for the past based on the average of the previous values
+        const pastValue = lastLevel - ((pastForecast.length + 1) * lastTrend * trendAdjustmentFactor) + seasonal[seasonalIndex];
+        if (!isNaN(pastValue)) {
+            pastValuesSum += pastValue;
+            pastValuesCount++;
+            const forecastedValue = pastValuesSum / pastValuesCount;
+
+            // Ensure the value is within historical min and max
+            //const adjustedForecastedValue = Math.min(Math.max(forecastedValue, historicalMin), historicalMax);
+
+            pastForecast.push({
+                Date: currentDate.toISOString().split('T')[0],
+                Distance: forecastedValue
+            });
+
+            console.log(`First pass past prediction for ${currentDate.toISOString().split('T')[0]}: ${forecastedValue}`);
+            console.log(`Used values for past prediction:`);
+            console.log(`  lastLevel=${lastLevel}`);
+            console.log(`  seasonal[${seasonalIndex}]=${seasonal[seasonalIndex]}`);
+            console.log(`  trendAdjustmentFactor=${trendAdjustmentFactor}`);
+            console.log(`  calculated forecastedValue=${forecastedValue}`);
+        } else {
+            pastForecast.push({
+                Date: currentDate.toISOString().split('T')[0],
+                Distance: NaN
+            });
+        }
+    }
+
+    console.log("Past forecast:");
+    console.log(pastForecast);
+
+    return pastForecast.concat(historicalData).concat(currentData).concat(forecast);
+}
+
+
+
+        function exponentialSmoothingForecast(data) {
+            const alpha = 0.5;
+            let smoothedData = [parseFloat(data[0].Distance)];
+
+            for (let i = 1; i < data.length; i++) {
+                const currentValue = parseFloat(data[i].Distance) || smoothedData[i - 1];
+                const smoothedValue = alpha * currentValue + (1 - alpha) * smoothedData[smoothedData.length - 1];
+                smoothedData.push(smoothedValue);
+            }
+
+            const futureDates = generateFutureDates(new Date(data[data.length - 1].Date), 2030);
+            const lastSmoothedValue = smoothedData[smoothedData.length - 1];
+
+            return data.concat(futureDates.map(date => ({ Date: date.toISOString().split('T')[0], Distance: lastSmoothedValue })));
+        }
+
+        function updateOptionsVisibility() {
+            const trendMethod = document.getElementById('trend-method-select').value;
+            const fillMethod = document.getElementById('trend-filled-method-select').value;
+            
+            document.getElementById('window-size-container').style.display = (fillMethod === 'movingAverage') ? 'block' : 'none';
+            document.getElementById('seasonal-period-container').style.display = (trendMethod === 'seasonaldecomposition' || trendMethod === 'holtWintersForecast') ? 'block' : 'none';
+        }
+    </script>
+</body>
+</html>

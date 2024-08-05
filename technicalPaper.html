@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical Paper and State of the Art Review</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        .content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1, h2 {
+            font-family: 'Times New Roman', serif;
+            color: #333;
+        }
+
+        h1 {
+            font-size: 2em;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        p, ul {
+            margin-bottom: 20px;
+            text-align: justify;
+            font-family: 'Times New Roman', serif;
+            font-size: 12px;
+        }
+
+        .abstract, .content-section {
+            margin-bottom: 40px;
+        }
+
+        .image-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .image-container .caption {
+            font-style: italic;
+            color: #555;
+        }
+
+        button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .cover-page {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .cover-page h1 {
+            font-size: 2.5em;
+            margin-bottom: 0;
+        }
+
+        .cover-page h2 {
+            font-size: 1.5em;
+            margin-top: 0;
+        }
+
+        .cover-page p {
+            margin-bottom: 5px;
+            font-size: 1.2em;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .table-title {
+            font-weight: bold;
+        }
+        @media print {
+            .content {
+                page-break-inside: avoid;
+            }
+            .image-container {
+                page-break-inside: avoid;
+            }
+            .content-section {
+                page-break-inside: avoid;
+            }
+            h2, h3, h4, p {
+                page-break-after: avoid;
+            }
+
+            #download{
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <!-- Cover Page -->
+        <div class="cover-page">
+            <h1>Interactive Coastal Erosion Map with AI Predictions</h1>
+            <h2>Authors</h2>
+            <p><strong>Primary Author:</strong> Theophile Avenel</p>
+            <p><strong>Supervisor:</strong> Bahareh Kamranzad</p>
+            <p><strong>Contributors:</strong> Hachem Kassem</p>
+        </div>
+
+        <div class="abstract">
+            <h2>Abstract</h2>
+            <p>
+                This technical paper explores the development of an interactive map to visualize coastal erosion using AI predictions. By integrating data from satellite imagery and other sources, we aim to provide a comprehensive tool for understanding shoreline changes over time. The project uses technologies such as Mapbox for visualization and various AI techniques for predictive modeling. In addition, a state-of-the-art review will be conducted to discuss existing tools and methodologies for coastal erosion visualization and prediction, highlighting current advancements and identifying gaps in the research.
+            </p>
+        </div>
+
+        <div class="content-section">
+            <h2>Introduction</h2>
+            <p>
+                Many research articles focus on shoreline extraction using satellite imagery, but few address the creation of an interactive map to visualize these changes. This technical paper aims to bridge that gap by developing an interactive map that uses AI predictions to visualize coastal erosion.
+            </p>
+            <p>Please note that the website/blog for my research topic is available at <a href="https://erosion-ai.tavenel.fr/">https://erosion-ai.tavenel.fr/</a></p>
+            <p>I fand two projects which created an interactive map: the CoastSat project, detailed on this  <a href="http://coastsat.wrl.unsw.edu.au/">site</a> and described in <a href="https://www.sciencedirect.com/science/article/pii/S1364815219300490">this scientific article</a>, and the <a href="http://aqua-monitor.appspot.com">Aqua Monitor </a>, which shows how the Earth's surface water has changed over the last 30 years, available here and explained in this Nature Climate Change paper.</p>
+            
+            <p>I haven't seen any articles that discuss how to represent coastal erosion on an interactive map because the shoreline is always changing; however, the coastline does not alter significantly.</p>
+            
+            <h2>Observations and Definition of the Coastline</h2>
+            
+            <p>
+                Coastal erosion visualization on interactive maps presents a unique challenge due to the dynamic nature of shorelines. As shorelines shift frequently, determining the precise location of the "coastline" becomes complex. The definition of a coastline can vary based on different criteria, such as tidal ranges or sediment movements.
+            </p>
+            
+            <p>
+                The image (Figure 1) below illustrates different representations of coastlines using various data sources. Each colored line represents a distinct method of defining the coastline:
+            </p>
+            
+            <ul>
+                <li><strong>OpenStreetMap Coastline (Blue):</strong> This line is derived from OpenStreetMap (OSM) data, which is crowd-sourced and might not always be precise. It shows a general outline of the coast based on contributors' input.</li>
+                <li><strong>CoastSat Shoreline (Yellow):</strong> The yellow line represents the shoreline data extracted using the CoastSat algorithm. This method relies on satellite imagery to determine the position of the shoreline with high precision, often identifying recent water levels and sediment deposits.</li>
+                <li><strong>Shoreline Transect (Red):</strong> Transects are specific cross-sections used to measure changes in the shoreline over time. The red lines in the image indicate these transects, which help in analyzing coastal erosion trends and patterns.</li>
+                <li><strong>Real Coastline? (Black):</strong> This hypothetical line suggests what might be considered the "real" coastline based on long-term observations and historical data. It is often used as a reference to compare with other data sources.</li>
+                <li><strong>Various Sand Colors:</strong> Different shades of sand color indicate variations in sediment composition and recent depositional patterns, which also affect the perceived location of the coastline.</li>
+                <li><strong>Recent Water Levels:</strong> The area marked by the yellow shading indicates the extent of recent water levels, showing how far inland the water has reached recently.</li>
+                <li><strong>Rocks:</strong> The presence of rocks in the coastal area can influence the shape and stability of the shoreline, acting as natural barriers against erosion.</li>
+            </ul>
+            
+            <h2>Challenges in Defining the Coastline</h2>
+            
+            <p>
+                The main challenge in representing coastal erosion on an interactive map lies in deciding which line to use as the "true" coastline. If you define the coastline as 100 meters from the latest shoreline at the highest tide, the coastline could appear constant for a while. However, this definition might not capture the dynamic changes occurring due to tidal influences, sediment movements, and human activities.
+            </p>
+            
+            <div class="image-container">
+                <img src="images/howtorepresentthecoastline.png" alt="How To Represent The Coastline">
+                <div class="caption">Fig1. Example of different coastline representations using various data sources.</div>
+            </div>
+            
+            <p>
+                This figure showcases the complexity of defining the coastline and highlights the need for a consistent and precise method to visualize coastal erosion accurately.
+            </p>
+            
+            <p>
+                The main challenge is how to represent coastal erosion on an interactive map.
+            </p>
+            <p>Firstly, let's start with a definition of my research topic to better understand the topic.</p>
+        </div>
+
+        <div class="content-section">
+            <h2>Definition of My Research Topic</h2>
+            <p>
+                What is an interactive map?
+            </p>
+            <p>
+                An interactive map is a digital map that allows users to actively engage with the displayed content, providing a dynamic and immersive experience. Unlike static maps, interactive maps offer features such as zooming, panning, and clickable elements that provide additional information through pop-ups, detailed descriptions, or hyperlinks.
+            </p>
+            <p>
+                The <a href="https://www.mapbox.com/" target="_blank">Mapbox</a> integration in our project is used to generate an interactive map that unveils coastal dynamics on sandy shores. This can be done by allowing users to freely explore different locations and zoom in and out to overlay historical and predictive images, helping to better understand coastal erosion patterns. 
+            </p>
+            <p>What is coastal erosion?</p>
+            <p>
+                Coastal erosion is the wearing away of coastlines through natural forces such as waves, tides, currents, and wind. It leads to the loss of land, with shorelines moving back, creating major environmental, economic, and social problems. Waves are a primary cause, constantly battering the shore and removing sand, rocks, and soil. Tidal forces worsen erosion by continuously altering sea levels, particularly in areas with high tidal ranges. Ocean currents transport sediment away from the coast, depleting beach materials. Human activities such as construction, urbanization, and dredging can disrupt littoral drifts and accelerate erosion.
+            </p>
+            <p>
+                The effects of coastal erosion are wide and varied, including loss of wildlife habitats, damage to property and infrastructure, and increased susceptibility to storm surges and flooding. Mitigation techniques such as beach nourishment, construction of protective barriers, and sustainable coastal management practices are used to address coastal erosion. However, efforts to address coastal erosion are challenging and require balancing human activity needs along coastlines with the conservation of natural coastal ecosystems.
+            </p>
+            <p>What are AI predictions in coastal erosion?</p>
+            <p>
+                The goal of AI predictions in coastal erosion is to forecast past and future trends of coastal erosion based on existing data points.
+            </p>
+        </div>
+
+        <div class="content-section">
+            <h2>1. Implementing the OSM Coastline Feature</h2>
+            <p>
+                OpenStreetMap (OSM) has a feature called OSM coastline, which contains data points to create a line representing the coastline. This feature can be explored in more detail at <a href="https://wiki.openstreetmap.org/wiki/Coastline">OSM Coastline</a>.
+            </p>
+            <p>
+                To retrieve JSON data from this coastline feature, I used the <a href="https://overpass-turbo.eu/">Overpass API OSM query</a>, as documented in the <a href="https://wiki.openstreetmap.org/wiki/Overpass_API">Overpass API documentation</a>.
+            </p>
+            <div class="image-container">
+                <img src="images/overpassqueryosmcoastline.png" alt="Overpass Query for OSM Coastline">
+                <div class="caption">Fig2. Example of the UI interface usage for retrieving coastline data points from OSM using the Overpass API.</div>
+            </div>
+            
+            <h2>Explanation of the Overpass Query</h2>
+            <p>The code snippet provided in the image demonstrates a simple Overpass query designed to fetch coastline data:</p>
+            
+            <pre>
+            <code>
+            /*
+            This is an example Overpass query.
+            Try it out by pressing the Run button above!
+            You can find more examples with the Load tool.
+            */
+            [out:json];
+            (
+              way["natural"="coastline"](34.0, -118.5, 34.1, -118.4); // Boundary limit: (south, west, north, east)
+            );
+            out body;
+            >;
+            out skel qt;
+            </code>
+            </pre>
+
+            <p>Here's a brief explanation of each line of the query:</p>
+            <ul>
+                <li><strong><code>[out:json];</code></strong> Specifies that the output should be in JSON format.</li>
+                <li><strong><code>(</code></strong> Begins a group of statements.</li>
+                <li><strong><code>way["natural"="coastline"](34.0, -118.5, 34.1, -118.4);</code></strong> Retrieves all ways tagged with <code>natural=coastline</code> within the specified boundary box (south, west, north, east).</li>
+                <li><strong><code>);</code></strong> Closes the group of statements.</li>
+                <li><strong><code>out body;</code></strong> Outputs the main content of the selected elements in JSON format.</li>
+                <li><strong><code>>;</code></strong> Recursively retrieves all nodes and ways referenced by the initial set of elements.</li>
+                <li><strong><code>out skel qt;</code></strong> Outputs a skeletal representation of the data, providing a quick and compact summary.</li>
+            </ul>
+            
+            <h2>Usage of the Overpass Turbo Interface</h2>
+            <p>The Overpass Turbo interface simplifies running these queries and visualizing the results. It allows users to input custom queries, run them, and see the output directly.</p>
+            
+            <p>I obtained the following result:</p>
+            <div class="image-container">
+                <img src="images/OSMAPIRESULT.png" alt="OSMAPIRESULT">
+                <div class="caption">Fig3. Result of the query from the previous figure (Fig2).</div>
+            </div>
+            
+            <h2>Explanation of the JSON Response</h2>
+            
+            <p>The result displayed in Figure 3 is a JSON response from the Overpass API query. This response includes detailed information about the coastline data points within the specified boundary. Below is a breakdown of the key components of the JSON response:</p>
+            
+            <h3>Metadata Section</h3>
+            <ul>
+                <li><strong><code>"version": 0.6</code></strong>: Specifies the version of the OSM data format.</li>
+                <li><strong><code>"generator": "Overpass API 0.7.62.1 084b4234"</code></strong>: Indicates the version of the Overpass API used to generate the response.</li>
+                <li><strong><code>"osm3s"</code></strong>: Contains metadata about the OSM data.
+                    <ul>
+                        <li><strong><code>"timestamp_osm_base": "2024-06-10T19:05:15Z"</code></strong>: The timestamp of the OSM data used for the query.</li>
+                        <li><strong><code>"copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."</code></strong>: Provides copyright information and data licensing details.</li>
+                    </ul>
+                </li>
+            </ul>
+            
+            <h3>Elements Section</h3>
+            <p>The <code>"elements"</code> array contains multiple elements, each representing a part of the coastline data.</p>
+            
+            <h3>Individual Elements</h3>
+            <ul>
+                <li><strong><code>"type": "way"</code></strong>: Indicates that the element is a "way", which is a sequence of nodes forming a polyline.</li>
+                <li><strong><code>"id": 443608554</code></strong>: The unique identifier for the way.</li>
+                <li><strong><code>"nodes"</code></strong>: An array of node IDs that make up the way. Each node represents a specific point along the coastline.
+                    <ul>
+                        <li>For example: <code>[538517786, 1196743648, 700870323, 511170655, 700870229, 511166998]</code></li>
+                    </ul>
+                </li>
+                <li><strong><code>"tags"</code></strong>: Contains key-value pairs describing the attributes of the way.
+                    <ul>
+                        <li><strong><code>"natural": "coastline"</code></strong>: Indicates that this way is tagged as a coastline.</li>
+                    </ul>
+                </li>
+            </ul>
+            
+            <h3>Multiple Ways</h3>
+            <p>The JSON response can contain multiple ways, each with its own set of nodes and tags. For example:</p>
+            <pre><code>{
+              "type": "way",
+              "id": 443608554,
+              "nodes": [538517786, 1196743648, 700870323, 511170655, 700870229, 511166998],
+              "tags": {"natural": "coastline"}
+            }
+            </code></pre>
+            <pre><code>{
+              "type": "way",
+              "id": 592262540,
+              "nodes": [511170705, 641166949, 641166975, 704870306, 704870316, 442569780],
+              "tags": {"natural": "coastline"}
+            }
+            </code></pre>
+            
+            <h3>Interpretation</h3>
+            <p>The JSON response from the Overpass API provides a structured representation of the coastline data, allowing users to have a first representation of the coordinates and attributes of each segment of the coastline.
+            <p>This figure illustrates the output of the Overpass API query, showing the JSON data structure containing the coastline details.</p>
+            
+            <p>Then I used <a target="_blank" href="https://overpass-api.de/api/interpreter">this API endpoint</a> to create a code to generate a GeoJSON file with all data from the OSM coastline for the desired <a target="_blank" href="https://wiki.openstreetmap.org/wiki/Bounding_box">bounding box</a>.</p>
+            <p>Example Python code used to generate GeoJSON file: <a target="_blank" href="openstreetmapcoastlineproject/osmcode.py">Example Python code to generate GeoJSON file with OSM coastline data points</a></p>
+            <p>Based on this feature, I implemented an interactive map: <a href="https://erosion-ai.tavenel.fr/openstreetmapcoastlineproject/ireland/ireland.html">Ireland and more with OSM coastline visualized with red lines</a></p>
+            <div class="image-container">
+                <img src="images/irelandandmoreredcoastline.png" alt="Ireland and more with red lines representing the OSM coastline data points">
+                <div class="caption">Fig4. Ireland and more with red lines representing the OSM coastline data points extracted from GeoJSON.</div>
+            </div>
+            
+            <h2>Key Features of the Interactive Map</h2>
+            <ul>
+                <li><strong>Interactive Slider:</strong> At the top left of the map, there is a slider allowing users to select different years. This feature provides a temporal aspect to the visualization, enabling the observation of coastline changes over time. However, it is important to note that this data corresponds to the JSON entries made by contributors each year, which may not always be precise.</li>
+                <li><strong>Red Lines Representing Coastlines:</strong> The coastlines are marked with red lines, clearly delineating the boundaries of land and water. These lines are derived from the OSM coastline data, providing an accurate representation of the coastal areas.</li>
+                <li><strong>Geographical Coverage:</strong> The map covers the entirety of Ireland and significant parts of the United Kingdom, including England, Scotland, and Wales.</li>
+                <li><strong>Mapbox Integration:</strong> The interactive map is built using Mapbox, a powerful tool for creating custom maps. Mapbox's capabilities enhance the user experience by allowing smooth zooming, panning, and interaction with the map elements.</li>
+            </ul>
+            
+            <p>This figure demonstrates the practical application of OSM coastline data in creating an interactive map, offering a first representation of the coastline but could not be accurate sometimes</p>
+            
+            <p>This provides a first representation of the coastline, but it is not accurate:</p>
+            <div class="image-container">
+                <img src="images/osmcoastlinenotsoprecise.png" alt="Example showing the inaccuracy of the OSM coastline data">
+                <div class="caption">Fig5. Example showing the inaccuracy of the OSM coastline data.</div>
+            </div>
+            <p>It's because contributors do their best to represent the coastline, but sometimes the datas are not accurate. Based on this conclusion, I searched for different research articles to solve my issues and found a useful article, which I will discuss in the next section.</p>
+        </div>
+
+        <div class="content-section">
+            <h2>2. SWED and Introduction to Shoreline Extraction</h2>
+            <a target="_blank" href="https://www.sciencedirect.com/science/article/pii/S0034425722001584">SWED article</a>
+            <a target="_blank" href="https://openmldata.ukho.gov.uk/">Sentinel-2 Water Edges Dataset (SWED)</a>
+            <p>SWED contains images captured by the European Space Agency's Sentinel-2 satellites between 2017 and 2021.</p>
+            <p>They used a convolutional neural network to transform original raw images into a segmentation map to clearly separate the water and the mainland.</p>
+            <div class="image-container">
+                <img src="images/explainingswed.jpg" alt="Explaining SWED">
+                <div class="caption">Fig6. [Extracted from SWED article, Fig6] Visualized segmentation results. The first and second columns depict the source image and the target label, respectively. The subsequent columns depict the predicted segmentation map from different models identified by the loss function used during training, e.g., CXE: Categorical Cross-entropy Loss, SDL: Sørensen–Dice Loss, Sobel: Sobel-Edge Loss, and W-SDL: Weighted-Sørensen–Dice Loss.</div>
+            </div>
+            <p>With this new dataset for training and benchmarking coastline extraction models, new articles have used the SWED dataset to explore different possibilities for shoreline extractions.</p>
+            <p>I will focus more on the following article: <a href="https://arxiv.org/html/2405.11494v1" target="_blank">Automated Coastline Extraction using Edge Detection Algorithms</a></p>
+            <div class="image-container">
+                <img src="images/swedEdgeDetection.png" alt="SWED Edge Detection">
+                <div class="caption">Fig7. [Extracted from SWED Edge detection article, Fig1] Example of a test image, binary land/water map, and coastline edge obtained from SWED.</div>
+            </div>
+            <p>As mentioned on the ARXIV website, the codes to reproduce the results of this paper can be found here: <a target="_blank" href="https://github.com/conorosully/SWED-edge-detection">GITHUB SWED EDGE DETECTION</a></p>
+            <p>In the Jupyter notebook code, they analyzed the effectiveness of four edge detection algorithms to detect coastlines: canny_ed, scharr_ed, sobel_ed, and prewitt_ed, and concluded that the Canny edge detection method produced the best results.</p>
+           
+            <p>
+            The figure consists of several columns and rows, each serving a specific purpose in illustrating the edge detection results. The columns include the RGB Image, Label, and Edge Reference. The RGB Image represents the original satellite image in full color. The Label is a binary land/water map where land is shown in white and water in black, providing a clear distinction between the two. The Edge Reference column highlights the coastline edge, showing the boundary between land and water as detected by various algorithms. Each row in the figure represents a different test image from the dataset, offering multiple examples of how the algorithms perform.
+            </p>
+            <p>
+            Visually comparing the RGB Image and the Label helps to understand the accuracy of the segmentation process. The first two columns provide this comparison, allowing us to see how well the binary map represents the actual land and water areas. The Edge Reference column, on the other hand, provides a clear view of the extracted coastline edges, making it easy to assess the performance of the edge detection algorithms.
+            </p>
+            <p>
+            Among the edge detection algorithms tested, the Canny Edge Detection algorithm is noted for its superior performance. It effectively detects a wide range of edges in images, producing the best results among the algorithms tested. In contrast, the Scharr, Sobel, and Prewitt edge detection algorithms, while also useful, focus more on highlighting gradients and were less effective compared to the Canny algorithm.
+            </p>
+            
+            <p>Based on this, I tried to create a new prototype using Canny edge detection.</p>
+        </div>
+
+        <div class="content-section">
+            <h2>3. The New Prototype: Superimposing Images</h2>
+            <ul>
+                <li>Combine different techniques such as superimposing grayscale images with a popup system in an interactive map to compare the shoreline evolution in a visual representation.</li>
+            </ul>
+            <p>I created a small prototype with a popup system in Dounam Bay: <a target="_blank" href="https://erosion-ai.tavenel.fr/openstreetmapcoastlineproject/dounambay/dounambay.html">Dounam Bay prototype</a></p>
+            <div class="image-container">
+                <img src="images/popuptocomparefromthelatestmap.png" alt="Popup To compare From The Latest Map">
+                <div class="caption">Fig8. Popup to compare from the latest map with multitemporal data.</div>
+            </div>
+            <p>
+                Figure 8 illustrates a prototype developed to visualize shoreline changes over time using a combination of techniques such as superimposing grayscale images and integrating a popup system. This prototype is specifically implemented for Dounam Bay and provides a comparative visual representation of the shoreline evolution.
+            </p>
+            <p>
+                The prototype developed for visualizing shoreline changes over time employs a combination of techniques such as superimposing grayscale images and integrating a popup system in an interactive map. Specifically implemented for Dounam Bay, this prototype provides a comprehensive visual representation of shoreline evolution. The interactive map, developed using Mapbox, displays the geographic area of Dounam Bay, allowing users to navigate, zoom in and out, and explore different sections of the shoreline. The prototype features a popup system that enables users to view images from different years. When users click on the popup marker, it displays images and relevant data for that location, facilitating a comparison of shoreline changes over time. The images in the popup are grayscale representations of the shoreline at different times, which helps highlight changes, making it easier to identify areas of erosion and accretion. Additionally, there is a temporal slider at the top left of the map that allows users to select different years, adding a temporal dimension to the visualization and enabling users to observe how the coastline has evolved over the years.
+            </p>
+            
+            <div class="image-container">
+                <img src="images/superpositionofreferences.png" alt="Superposition Of References">
+                <div class="caption">Fig9. Example of superimposing grayscale images with a popup system in an interactive map to compare the shoreline evolution in a visual representation.</div>
+            </div>
+            <p>How did I generate the different grayscale images?</p>
+            <p>Firstly, I used a software named <a href="https://www.gimp.org/">Gimp</a> for manual labeling of the images. This process involves applying one color to represent land and another color to represent water.</p>
+            <div class="image-container">
+                <img src="images/gimptechniques.png" alt="Gimp Techniques">
+                <div class="caption">Fig10. Manual labeling of an image to identify the mainland and the water using Gimp.</div>
+            </div>
+            <p>Figure 10 shows how I used Gimp to manually color different areas, facilitating the distinction between land and water in satellite images. This method allows for accurate grayscale images necessary for analyzing shoreline changes.</p>
+            
+
+            <div class="image-container">
+                <img src="images/extractcodetoconvertmanuallabellingimagetograyscale.png" alt="Python code To convert Manual Labelling Image To Grayscale">
+                <div class="caption">Fig11. Python code using Canny edges to generate grayscale images.</div>
+            </div>
+            <p>Next, I used Python with the OpenCV library to convert the manually labeled images into grayscale images. The following steps outline the process:</p>
+            <ul>
+                <li><strong>Loading the image:</strong> The image is loaded using OpenCV's imread function.</li>
+                <li><strong>Converting to grayscale:</strong> The image is converted to grayscale using cvtColor.</li>
+                <li><strong>Applying a threshold:</strong> A binary threshold is applied to create a binary image, which separates the land and water.</li>
+                <li><strong>Edge detection:</strong> Canny edge detection is used to detect the edges in the binary image.</li>
+                <li><strong>Finding contours:</strong> The contours of the detected edges are found using findContours.</li>
+                <li><strong>Creating a black image:</strong> A blank image is created to draw the contours.</li>
+                <li><strong>Drawing contours:</strong> The contours are drawn on the black image in white.</li>
+            </ul>
+            <p>This process is illustrated in the Python code snippet in Figure 11, where each step is implemented to convert the manually labeled images into grayscale images for further analysis.</p>
+            <div class="image-container">
+                <img src="images/dounambay_grayscale_2011.png" alt="Dounambay Grayscale July 2011">
+                <div class="caption">Fig12. Dounambay Grayscale July 2011 generated with the Python code in the previous figure (Fig11).</div>
+            </div>
+            <p>Manual labeling of a picture with Gimp takes approximately 8 minutes per picture, so I tried to create an auto-labeling feature with machine learning.</p>
+            <p>Firstly, I trained a classification algorithm, detailed in the next section.</p>
+        </div>
+
+        <div class="content-section">
+            <h2>4. The Auto-labeling Feature for Google Earth Screenshots</h2>
+            <p>To streamline the labeling process, I captured approximately 1200 different screenshots from Google Earth Studio. These images served as the dataset for training a machine learning model to automatically label the shoreline images.</p>
+            
+            <p>The Github repositository is here: <a href="https://github.com/thekester/coastalSentinel/tree/main">Github repo</a> </p>
+            <p>The zip archive which conatins the classification folder is here: <a href="https://erosion-ai.tavenel.fr/zip/classification.zip">The zip archive</a></p>
+            <div class="image-container">
+                <img src="images/googleearthdata.png" alt="Google Earth data">
+                <div class="caption">Fig13. Directory structure of the Google Earth data used for training and validation.</div>
+            </div>
+            <p>Figure 13 shows the directory structure of the dataset. The data is organized into three main categories: both (for images containing both land and water), mainland (for images containing only land), and water (for images containing only water). Each category is further divided into training and validation sets, ensuring a structured approach to model training and evaluation.</p>
+            <p>This organization facilitates the training of a classification algorithm that can automatically label the images, significantly reducing the time and effort required for manual labeling.</p>
+            
+
+            <div class="image-container">
+                <img src="images/directoriesclassification.png" alt="Classification directories">
+                <div class="caption">Fig14. Screenshot showing the process of loading data for training the classification model. The data is organized into training and validation directories with three classes: mainland, water, and both. The model begins training with the loaded data.</div>
+            </div>
+            <p>Figure 14 illustrates the process of loading the training and validation data. The dataset contains 1205 images divided into three classes: mainland, water, and both. The screenshot shows the loading process for each class and the start of the training process, with the model achieving an accuracy of 87.97% in the initial epochs. This structured approach to data management and model training ensures the robustness and reliability of the auto-labeling feature.</p>
+            
+
+            <div class="image-container">
+                <img src="images/trainingclassificationmodel.png" alt="Training classification model">
+                <div class="caption">Fig15. Training the classification model over 102 epochs. The screenshot shows various performance metrics, including accuracy, precision, recall, and loss for both training and validation datasets. The model's accuracy improves steadily, indicating effective learning.</div>
+            </div>
+            <p>Figure 15 shows the training process over 102 epochs, highlighting the model's performance metrics such as accuracy, precision, recall, and loss. The model demonstrates steady improvement in accuracy and other metrics, indicating effective learning and the potential for reliable auto-labeling of shoreline images.</p>
+
+
+            <div class="image-container">
+                <img src="images/confusionmatrix.png" alt="Confusion matrix">
+                <div class="caption">Fig16. Confusion matrix illustrating the performance of the classification model. The matrix shows the true labels versus the predicted labels for the three classes: both, mainland, and water. This provides insight into the model's accuracy and areas for improvement.</div>
+            </div>
+            <p>Figure 16 provides a detailed look at the confusion matrix for the classification model. The matrix compares the true labels against the predicted labels for the three classes: both, mainland, and water. It highlights the model's strengths and weaknesses, showing where misclassifications occur. For instance, the model tends to confuse images of water and both, indicating areas where further refinement is needed.</p>
+            <p>To better understand why the loss is high, the following figure illustrates the model's predictions:</p>
+            <div class="image-container">
+                <img src="images/exampleofpredictionsclassification.png" alt="Example of predictions classification">
+                <div class="caption">Fig17. Examples of predictions from the classification model. Each image shows the true label and the predicted label, demonstrating where the model performed correctly and where it misclassified.</div>
+            </div>
+            <p>Figure 17 presents examples of the classification model's predictions. Each image displays the true label and the predicted label, highlighting instances where the model correctly identified the category and where it made errors. This visual representation helps in understanding the model's performance and identifying areas for improvement.</p>
+            <p>You can find two different repositories of code on GitHub: <a href="https://github.com/thekester/coastline-ML/tree/main">First version of my code</a>, the second version: <a href="https://github.com/thekester/coastalSentinel">Second version of my code</a>, and <a href="https://github.com/thekester/googleearthdatas">Version for Google Earth data</a>.</p>
+            <p>Based on these results, I concluded that the classification method might not be sufficient, so I tried another machine learning algorithm: UNet.</p>
+            
+        </div>
+
+        <div class="content-section">
+            <h2>5. Segmentation Image Processing with Weighted Cross Entropy</h2>
+            <p>In this section, we explore segmentation image processing using a weighted cross-entropy loss function. This method helps to improve the accuracy of segmenting images into different classes, such as land and water.</p>
+            <div class="image-container">
+                <img src="images/processingimageboth.png" alt="Processing image both_0444">
+                <div class="caption">Fig18. Example of processing an image from the Google Earth Engine dataset. The left image is the original satellite image, and the right image is the segmented version, where Class 0 (land) is shown in purple and Class 1 (water) is shown in yellow.</div>
+            </div>
+            <p>Figure 18 illustrates the process of segmenting a satellite image into land and water classes using a machine learning model trained with a weighted cross-entropy loss function. The original image (left) is processed to produce a segmented image (right), which classifies each pixel as either land (Class 0) or water (Class 1).</p>
+            <div class="image-container">
+                <img src="images/processimagewrongprediction.png" alt="Process image wrong prediction">
+                <div class="caption">Fig19. Comparison of Original, Predicted, and Manual Label images for a test case. The top image is the original satellite image, the middle image shows the predicted segmentation by the model, and the bottom image is the manual labeling for reference.</div>
+            </div>
+            <p>To improve the model's accuracy, I implemented a manual loss function similar to the weighted cross-entropy loss. This approach allows the model to learn from manual labels whenever the loss on a picture is high, helping to understand the reasons behind wrong predictions and to reduce the overall loss.</p>
+            <p>However, I encountered several challenges. One major issue was the presence of a grid in the screenshots taken from Google Earth Studio Pro, which made it difficult for the UNet algorithm to accurately distinguish between water and mainland.</p>
+            <p>Additionally, not correlating the shorelines with data on tides and sea levels can lead to incorrect conclusions about the shoreline's evolution. It is crucial to integrate these datasets to ensure a comprehensive understanding of shoreline dynamics.</p>
+            <p>After discussing these issues with Hachem, he recommended using CoastSat, a package widely used by coastal engineers for shoreline detection and analysis.</p>            
+        </div>
+
+        <div class="content-section">
+            <h2>6. CoastSat</h2>
+            <p>The research article is available here: <a target="_blank" href="https://www.sciencedirect.com/science/article/pii/S1364815219300490">CoastSat research article</a></p>
+            <p>The GitHub repository code is available here: <a target="_blank" href="https://github.com/kvos/CoastSat">GitHub repository code</a></p>
+            <p>CoastSat also has a website: <a target="_blank" href="http://coastsat.wrl.unsw.edu.au/">CoastSat website</a></p>
+            <p>The CoastSat website provides an interactive map to visualize coastal erosion in different locations.</p>
+            <div class="image-container">
+                <img src="images/asidecoastsat.png" alt="Aside CoastSat">
+                <div class="caption">Fig20. Sidebar menu of CoastSat showing options for basemaps, CoastSat data, metadata, and geometries.</div>
+            </div>
+            <p>On the left side of the interface, we can see the sidebar menu of CoastSat where different parameters can be selected, such as basemaps, CoastSat data, and metadata. This menu also includes options for visualizing long-term trends, shoreline time-series, and beach-face slopes.</p>
+            <p>Additionally, the sidebar provides access to metadata like Mean Springs Tidal Range (MSTR), Mean Significant Wave Height (Hs), Relative Tidal Range (RTR), and satellite images from Landsat and Sentinel-2. A download button is available for data download specifications.</p>
+            <p>Integrating these datasets allows users to study and visualize coastal changes comprehensively, making it an invaluable tool for researchers and policymakers in coastal management and erosion mitigation.</p>
+            
+            <p>Legends are also provided on the map, such as the trend (meter/year).</p>
+            <div class="image-container">
+                <img src="images/trendmeterperyear.png" alt="Trend meter per year">
+                <div class="caption">Fig21. Trend (m/year) along the coast represented with different colored lines.</div>
+            </div>
+            <p>As seen in Fig21, there are different colored lines along the coast. These colors represent various rates of coastal change, with the legend indicating the trend in meters per year. This allows users to quickly identify areas experiencing significant erosion or accretion.</p>
+            
+            <p>These lines represent the shoreline of a specific area. If we click on a shoreline:</p>
+            <div class="image-container">
+                <img src="images/popuplittle.png" alt="Popup showing details of the shoreline">
+                <div class="caption">Fig22. Shoreline popup displaying mean trend and additional data.</div>
+            </div>
+            <p>As shown in Fig22, a popup appears when a shoreline is clicked. This popup provides detailed information about the selected segment, such as the mean trend (in meters per year) and the tangent of the beach slope (tanβ). Additionally, a button labeled "show transects" allows users to view transect data for more detailed analysis.</p>
+            <div class="image-container">
+                <img src="images/showtransectclicked.png" alt="Show transect clicked">
+                <div class="caption">Fig23. Show transect clicked.</div>
+            </div>
+            <p>When the "show transects" button is clicked, all transects of the shorelines are displayed with a specific color related to the legend (trend in meter/year). This feature provides a visual representation of the shoreline's evolution, helping to understand the patterns of erosion and accretion over time.</p>
+            <div class="image-container">
+                <img src="images/transectclicked.png" alt="Transect clicked">
+                <div class="caption">Fig24. Transect clicked.</div>
+            </div>
+            <p>When a transect is clicked, a popup is displayed with a cross-shore change chart to see the evolution over the years. As seen in Fig24, the chart provides a visual representation of changes in the cross-shore distance over time, indicating periods of erosion and accretion.</p>
+            <p>With CoastSat software, we can study specific areas. The software contains functions to retrieve images from different satellite missions and collections over 30 years, extract shorelines using a sub-pixel resolution technique, and generate shoreline animations to see the erosion over time. Transects are used in both main projects, subdividing a specific area to identify a general trend in that area.</p>
+            <p>They created a hazard summary focused on Narrabeen sandy beaches: <a href="https://coastalews.wrl.unsw.edu.au/local/Narrabeen/">Australian Beach Erosion and Coastal Flooding EWS focus on Narrabeen</a></p>
+        </div>
+
+        <div class="content-section">
+            <h2>7. My Prototype</h2>
+            <p>Based on all previous work, I created a new prototype to address my research topic: Interactive Coastal Erosion Map with AI Predictions.</p>
+            <p>Note that my prototype is highly inspired by CoastSat and uses some CoastSat data (<a href="http://coastsat.wrl.unsw.edu.au/">CoastSat website</a>).</p>
+            <p>You can find the latest version of my prototype here: <a href="https://erosion-ai.tavenel.fr/aipredictions/project/project.html" target="_blank">Prototype</a></p>
+            <div class="image-container">
+                <img src="images/projectearthscreenshot.png" alt="Project Earth screenshot">
+                <div class="caption">Fig25. Earth Project Screenshot.</div>
+            </div>
+            <p>In this prototype, I used the Mapbox library to create an interactive map and implemented data from CoastSat. This map allows users to explore coastal erosion data and AI predictions in an intuitive and interactive way, enhancing the understanding of shoreline changes over time.</p>
+            
+            <p>After using CoastSat software, I started to make new data points on France.</p>
+            <div class="image-container">
+                <img src="images/firstpolygon.png" alt="First polygon">
+                <div class="caption">Fig26. A polygon study area in France.</div>
+            </div>
+            <p>This image shows a polygon study area on the coast of France. The polygon outlines the specific region where new data points are being collected and analyzed to study coastal erosion and shoreline changes using the methodologies and tools discussed earlier.</p>
+            
+            <p>If you click on the custom blue marker:</p>
+            <div class="image-container">
+                <img src="images/videoDunkerque.png" alt="Video Dunkerque">
+                <div class="caption">Fig27. Shoreline animation generated by CoastSat software.</div>
+            </div>
+            <p>With the shoreline animation, we can study a specific area with all satellite images to check the shoreline evolution over time. This animation helps visualize how the shoreline has changed and allows for a more detailed analysis of coastal erosion patterns.</p>
+            <p>At the bottom of the shoreline animation, there is a select button.</p>
+            <div class="image-container">
+                <img src="images/selectImagesToComapre.png" alt="Select Images To Compare">
+                <div class="caption">Fig28. Select Images to Compare.</div>
+            </div>
+            <p>This feature allows users to select two different satellite images for comparison. By using this tool, users can visually analyze changes in the shoreline between the selected dates, providing a clear understanding of the coastal erosion or accretion over time.</p>
+            
+            <p>When an image is selected from the comparison tool, the interface shows detailed visualizations of the selected image.</p>
+            <div class="image-container">
+                <img src="images/first.png" alt="First Image">
+                <div class="caption">Fig29. Detailed visualization of the selected image from the comparison tool.</div>
+            </div>
+            <p>The selected image is presented with various layers such as sand, whitewater, water, and shoreline, allowing users to thoroughly investigate the coastal changes. This visual representation helps in identifying specific areas affected by erosion or accretion over the years.</p>
+            
+            <p>Additionally, the sea level information is provided for the selected image to offer a more comprehensive analysis.</p>
+            <div class="image-container">
+                <img src="images/second.png" alt="Second Image">
+                <div class="caption">Fig30. Sea level information of the first image.</div>
+            </div>
+            <p>This information includes the sea level readings at the time the image was captured, which is crucial for understanding the context of the shoreline changes. Users can also access the URL provided for more detailed sea level data from the SONEL website.</p>
+            
+            <p>The comparison tool also allows users to view another selected image in detail, as shown below:</p>
+            <div class="image-container">
+                <img src="images/third.png" alt="Third Image">
+                <div class="caption">Fig31. Second image.</div>
+            </div>
+            <p>This second image provides additional insights into the coastal changes over time, with similar visual layers and information to facilitate a comprehensive comparison. By analyzing multiple images from different dates, users can better understand the dynamics of coastal erosion and accretion.</p>
+            
+            <p>Finally, the sea level information is also provided for the second image:</p>
+            <div class="image-container">
+                <img src="images/fourth.png" alt="Fourth Image">
+                <div class="caption">Fig32. Sea level info of the second image.</div>
+            </div>
+            <p>The red button "Close Comparing Two Images Section" closes the comparing section, and the user returns to the section with the video and the select button if they want to compare other images.</p>
+            
+            <p>I also implemented CoastSat data by downloading them to integrate them into my latest prototype.</p>
+            <div class="image-container">
+                <img src="images/polygonnewprototype.png" alt="Polygon New Prototype">
+                <div class="caption">Fig33. Polygon new prototype.</div>
+            </div>
+            <p>In this figure, you can see the polygon representing the study area in my new prototype. The integration of CoastSat data allows for precise and detailed analysis of the shoreline, making it possible to visualize and monitor coastal changes with high accuracy.</p>
+            
+            <div class="image-container">
+                <img src="images/purpleline.png" alt="Purple Line">
+                <div class="caption">Fig34. Purple line.</div>
+            </div>
+            <p>The purple line represents the OpenStreetMap (OSM) coastline extracted with the API. This integration allows for the visualization of current coastline data, making it easier to compare with other data sources and analyze coastal changes over time. </p>
+            
+            <div class="image-container">
+                <img src="images/shoreline.png" alt="Shoreline">
+                <div class="caption">Fig35. Blue line.</div>
+            </div>
+            <p>The blue line represents the shoreline of the specific area inside the polygon. </p>
+            
+            <p>When the shoreline is clicked, all transects of the shorelines are displayed (in red lines).</p>
+            <div class="image-container">
+                <img src="images/transectclickednewprototype.png" alt="Transect Clicked New Prototype">
+                <div class="caption">Fig36. Transect clicked on the new prototype.</div>
+            </div>
+            <p>This prototype features a "Site Information" section, where users can see specific details about the selected site. Additionally, two buttons labeled "Show Cross-shore Distance" and "Show Cross-shore Change" provide options for further data analysis. When clicked, these buttons display transects (red lines) that help in understanding the changes in the shoreline by showing distance and change metrics across different years. This functionality enhances the analysis of coastal erosion by giving a clear visual representation of the changes over time.</p>
+            
+            <p>Two buttons are displayed: "Show Cross-shore Distance" and "Show Cross-shore Change".</p>
+
+            <div class="image-container">
+                <img src="images/showcrossshoredistance.png" alt="Show Cross Shore Distance">
+                <div class="caption">Fig37. Show cross-shore distance.</div>
+            </div>
+            
+            <div class="image-container">
+                <img src="images/showcrosschange.png" alt="Show Cross Shore Change">
+                <div class="caption">Fig38. Show cross-shore change.</div>
+            </div>
+            
+            <p>These graphs provide detailed insights into the cross-shore distance and change over time. Additionally, there are two more buttons: "Select Forecasting Method" and "Select Prediction Mode", which are used for the time forecasting part detailed in the next section.</p>
+             </div>
+
+        <div class="content-section">
+            <h2>8. AI Predictions (Times Forecasting)</h2>
+            <p>To implement this part, I created a webpage for time series analysis and prediction: <a href="https://erosion-ai.tavenel.fr/aipredictions/project/predictionmodel3.html">AI predictions</a></p>
+            <p>The goal of this part is straightforward: Using existing data, I aimed to find a method to predict the past and future of the shoreline.</p>
+            <p>On this webpage, I implemented various forecasting methods such as Naïve, SNaïve, Seasonal Decomposition, State Space Model, and Holt-Winters directly on the time-series data collected from the CoastSat website.</p>
+            <p>After implementing these methods, I applied them to the transect data to generate forecasts.</p>
+            <p>The Naïve method is a simple time series forecasting approach that assumes future values will be equal to the last observed values in previous cycles.</p>
+            <div class="image-container">
+                <img src="images/naivetimeforecasting.png" alt="Naive Time Forecasting">
+                <div class="caption">Fig39. Naive time forecasting.</div>
+            </div>
+            
+            <p>The SNaive (Seasonal Naive) method predicts future values by assuming they will be equal to the last observed values from the same season in previous cycles.</p>
+            <div class="image-container">
+                <img src="images/seasonalnaivetimeforecasting.png" alt="Seasonal Naive Time Forecasting">
+                <div class="caption">Fig40. Seasonal Naive time forecasting.</div>
+            </div>
+
+            <p>The Holt-Winters method, also known as triple exponential smoothing, is a sophisticated forecasting technique used for time series data exhibiting both trend and seasonality. This method is particularly valuable as it incorporates additional smoothing equations to account for these elements, making it ideal for more complex datasets.</p>
+            <div class="image-container">
+                <img src="images/holtwinterstimeforecasting.png" alt="Holt Winters Time Forecasting">
+                <div class="caption">Fig41. Holt-Winters time forecasting.</div>
+            </div>
+            <p>The implementation of these various forecasting techniques provides a comprehensive approach to understanding and predicting shoreline changes. By analyzing past data and projecting future trends, we can gain valuable insights into coastal dynamics, which is crucial for effective coastal management and mitigation strategies. This leads us to a broader discussion on the implications and effectiveness of these methods in real-world applications.</p>
+        </div>
+
+        <div class="content-section">
+            <h2>9. Discussion</h2>
+            <p>One of the significant challenges encountered when retrieving satellite imagery is the high cloud contamination present in some images. This contamination can severely impact the ability of the CoastSat model to accurately extract shoreline data, as illustrated in the image below.</p>
+            <div class="image-container">
+                <img src="images/shorleinehavrealltimes.png" alt="Shoreline HAVRE all times">
+                <div class="caption">Fig42. Shoreline HAVRE all times.</div>
+            </div>
+            <p>For more information on addressing cloud contamination in NDVI images through SAR-Optical fusion using spatio-temporal partitioning and multiple linear regression, refer to the following article: <a href="https://www.sciencedirect.com/science/article/pii/S0924271623000618" target="_blank">Reconstructing Cloud-Contaminated NDVI Images</a>. Additionally, improvements in handling cloud contamination can be explored using the resources available in this GitHub repository: <a href="https://github.com/yongjingmao/DIL_SDS" target="_blank">DIL_SDS on GitHub</a>.</p>
+            <p>Another critical challenge is making accurate AI predictions to forecast future or past coastlines. The implementation of time series forecasting methods, as demonstrated in this project, can provide better estimations of shoreline changes over time. By integrating advanced forecasting techniques such as the Naive method, Seasonal Naive method, and Holt-Winters method, we can gain more reliable insights into coastal dynamics and better inform coastal management strategies.</p>
+            <p>Overall, addressing these challenges requires a combination of improved data preprocessing to mitigate cloud contamination and the application of robust forecasting models to predict shoreline changes accurately. Future work should focus on enhancing these methodologies to improve the precision and applicability of shoreline predictions.</p>
+        </div>
+        
+        <div class="content-section">
+            <h2>References</h2>
+            <ul>
+                <li>Catherine Seale, Thomas Redfern, Paul Chatfield, Chunbo Luo, Kari Dempsey, Coastline detection in satellite imagery: A deep learning approach on new benchmark data, Remote Sensing of Environment, Volume 278, 2022, 113044, ISSN 0034-4257, <a href="https://doi.org/10.1016/j.rse.2022.113044" target="_blank">https://doi.org/10.1016/j.rse.2022.113044</a>. (<a href="https://www.sciencedirect.com/science/article/pii/S0034425722001584" target="_blank">https://www.sciencedirect.com/science/article/pii/S0034425722001584</a>)</li>
+                <li>Harley, M.D., Turner, I.L., Short, A.D., & Ranasinghe, R. (2011). A reevaluation of coastal embayment rotation: The dominance of cross-shore versus alongshore sediment transport processes, Collaroy–Narrabeen Beach, southeast Australia. Journal of Geophysical Research: Earth Surface, 116(F4). <a href="https://doi.org/10.1029/2011JF001989" target="_blank">https://doi.org/10.1029/2011JF001989</a></li>
+                <li>Vos, K., Harley, M.D., Splinter, K.D., Turner, I.L., & Ruessink, B.G. (2019). Sub-annual to multi-decadal shoreline variability from publicly available satellite imagery. Coastal Engineering, 150, 160-174. <a href="https://doi.org/10.1016/j.coastaleng.2019.04.004" target="_blank">https://doi.org/10.1016/j.coastaleng.2019.04.004</a></li>
+                <li>Yongjing Mao, Thomas G. Van Niel, Tim R. McVicar, Reconstructing cloud-contaminated NDVI images with SAR-Optical fusion using spatio-temporal partitioning and multiple linear regression, Remote Sensing of Environment, Volume 278, 2023, 113061, ISSN 0924-2716, <a href="https://www.sciencedirect.com/science/article/pii/S0924271623000618" target="_blank">https://doi.org/10.1016/j.rse.2023.113061</a></li>
+                <li>Arjen Luijendijk, Gerben Hagenaars, Roshanka Ranasinghe, Fedor Baart, Gennadii Donchyts & Stefan Aarninkhof, The State of the World’s Beaches, Nature Scientific Reports, 2018.  <a href="https://doi.org/10.1038/s41598-018-24630-6" target="_blank">https://doi.org/10.1038/s41598-018-24630-6</a> (<a href="https://www.nature.com/articles/s41598-018-24630-6" target="_blank">https://www.nature.com/articles/s41598-018-24630-6</a>)</li>
+                <li>Gennadii Donchyts, Fedor Baart, Hessel Winsemius, Noel Gorelick, Jaap Kwadijk & Nick van de Giesen, Earth's surface water change over the past 30 years, Nature Climate Change, 2016. <a href="https://doi.org/10.1038/nclimate3111" target="_blank">https://doi.org/10.1038/nclimate3111</a> (<a href="https://www.nature.com/articles/nclimate3111" target="_blank">https://www.nature.com/articles/nclimate3111</a>)</li>
+
+            </ul>
+        </div>
+    </div>
+    <button id="download" onclick="downloadPage()">Download Page</button> <!-- Used simply CTRL+P for better results-->
+    <script>
+        function downloadPage() {
+            const element = document.querySelector('.content'); // Select the content to be converted to PDF
+            const opt = {
+                margin:       0.5,
+                filename:     'technical_paper.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+            // New Promise-based usage:
+            html2pdf().set(opt).from(element).save();
+        }
+    </script>
+</body>
+</html>

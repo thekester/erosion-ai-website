@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Data Loader and Prediction Model</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="chart.js"></script>
+    <script src="chartjs-adapter-date-fns.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        h1, h2, h3 {
+            text-align: center;
+            color: #333;
+        }
+
+        h1 {
+            margin-top: 20px;
+        }
+
+        .section {
+            margin: 20px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .section h2 {
+            margin-top: 0;
+        }
+
+        .description {
+            margin-bottom: 20px;
+            color: #555;
+            font-size: 18px;
+        }
+
+        button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        select {
+            display: block;
+            margin: 20px auto;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+
+        select:hover {
+            border-color: #007bff;
+        }
+
+        #spinner, #spinner2, #spinner3, #spinner4, #spinner5, #spinner6, #spinner7, #spinner8 {
+            display: none;
+            border: 16px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 16px solid #3498db;
+            width: 120px;
+            height: 120px;
+            animation: spin 2s linear infinite;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        canvas {
+            margin-top: 20px;
+            width: 100%;
+            height: 400px;
+        }
+
+        .chart-container {
+            margin-bottom: 40px;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            padding: 10px;
+            border-radius: 4px;
+            overflow: auto;
+        }
+
+        #error-message, #error-message2, #error-message3, #error-message4, #error-message5, #error-message6, #error-message7, #error-message8 {
+            color: red;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        footer {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #007bff;
+            color: #fff;
+            text-align: center;
+        }
+
+        #loss, #lossPoly, #lossDT, #lossRF, #lossSVM, #lossNN {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 18px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Interactive Data Loader and Prediction Model</h1>
+
+    <div class="section">
+        <h2>Part 1: Load and Display Data</h2>
+        <div class="description">
+            In this section, we will load 10 random files and display the data from each file on a single chart with 10 different colored lines. This will help us visualize the shoreline distances over time.
+        </div>
+        <select id="directory-select">
+            <option value="mex">Mex</option>
+            <option value="usa_CA">USA CA</option>
+        </select>
+        <button onclick="loadRandomFiles()">Load Random Files</button>
+        <canvas id="chart1"></canvas>
+        <pre id="fileNames"></pre>
+        <div id="spinner"></div>
+        <div id="error-message"></div>
+    </div>
+
+    <div class="section">
+        <h2>Part 2: Predict Missing Values with Linear Regression</h2>
+        <div class="description">
+            In this section, we aim to predict the missing values (denoted as 'None') in the dataset using linear regression. We use TensorFlow.js to perform linear regression. The model is trained using the Mean Squared Error (MSE) loss function. The equation for linear regression is:
+            $$y = mx + b$$
+            where \(m\) is the slope and \(b\) is the y-intercept. The goal is to minimize the loss function:
+            $$\text{MSE} = \frac{1}{n} \sum_{i=1}^{n} (y_i - (mx_i + b))^2$$
+        </div>
+        <select id="directory-select-predict">
+            <option value="mex">Mex</option>
+            <option value="usa_CA">USA CA</option>
+        </select>
+        <button onclick="loadAndPredictFiles(10)">Load and Predict with 10 Files</button>
+        <button onclick="loadAndPredictFiles(100)">Load and Predict with 100 Files</button>
+        <button onclick="loadAndPredictFiles(1000)">Load and Predict with 1000 Files</button>
+        <canvas id="chart2"></canvas>
+        <div id="loss"></div>
+        <pre id="fileNames2"></pre>
+        <pre id="predictions"></pre>
+        <div id="spinner2"></div>
+        <div id="error-message2"></div>
+        <div class="conclusions">
+            <h3>Conclusions</h3>
+            <p>After training the model, we observed a high loss value (e.g., \(10^{22}\)), indicating that the model does not converge well with the current settings. This suggests that linear regression might not be the best approach for this dataset. Future work will involve experimenting with other techniques, such as polynomial regression, decision trees, or random forests, to achieve better predictions.</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Part 3: Predict Missing Values with Polynomial Regression</h2>
+        <div class="description">
+            In this section, we aim to predict the missing values using polynomial regression. Polynomial regression is an extension of linear regression where we fit a polynomial equation to the data. The equation for polynomial regression is:
+            $$y = a_0 + a_1x + a_2x^2 + ... + a_nx^n$$
+            The goal is to minimize the loss function:
+            $$\text{MSE} = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2$$
+        </div>
+        <select id="directory-select-predict-poly">
+            <option value="mex">Mex</option>
+            <option value="usa_CA">USA CA</option>
+        </select>
+        <button onclick="loadAndPredictFilesPoly(10)">Load and Predict with 10 Files</button>
+        <button onclick="loadAndPredictFilesPoly(100)">Load and Predict with 100 Files</button>
+        <button onclick="loadAndPredictFilesPoly(1000)">Load and Predict with 1000 Files</button>
+        <canvas id="chart3"></canvas>
+        <div id="lossPoly"></div>
+        <pre id="fileNames3"></pre>
+        <pre id="predictionsPoly"></pre>
+        <div id="spinner3"></div>
+        <div id="error-message3"></div>
+        <div class="conclusions">
+            <h3>Conclusions</h3>
+            <p>After training the model, we observed a loss value of NaN, indicating that the model does not converge well with the current settings. This suggests that polynomial regression might not be the best approach for this dataset. Future work will involve experimenting with other techniques, such as decision trees, random forests, SVM, or neural networks, to achieve better predictions.</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Part 4: Predict Missing Values with Decision Trees</h2>
+        <div class="description">
+            In this section, we aim to predict the missing values using Decision Trees. Decision Trees are a type of supervised learning algorithm that can be used for both classification and regression tasks. The model splits the data into subsets based on the value of input features and makes predictions based on the average of the target variable in each subset.
+        </div>
+        <select id="directory-select-predict-dt">
+            <option value="mex">Mex</option>
+            <option value="usa_CA">USA CA</option>
+        </select>
+        <button onclick="loadAndPredictFilesDT(10)">Load and Predict with 10 Files</button>
+        <button onclick="loadAndPredictFilesDT(100)">Load and Predict with 100 Files</button>
+        <button onclick="loadAndPredictFilesDT(1000)">Load and Predict with 1000 Files</button>
+        <canvas id="chart4"></canvas>
+        <div id="lossDT"></div>
+        <pre id="fileNames4"></pre>
+        <pre id="predictionsDT"></pre>
+        <div id="spinner4"></div>
+        <div id="error-message4"></div>
+    </div>
+
+    <div class="section">
+        <h2>Part 5: Predict Missing Values with Random Forests</h2>
+        <div class="description">
+            In this section, we aim to predict the missing values using Random Forests. Random Forests are an ensemble learning method that combines multiple decision trees to improve the accuracy and robustness of predictions. Each tree in the forest is trained on a random subset of the data, and the final prediction is obtained by averaging the predictions of all trees.
+        </div>
+        <select id="directory-select-predict-rf">
+            <option value="mex">Mex</option>
+            <option value="usa_CA">USA CA</option>
+        </select>
+        <button onclick="loadAndPredictFilesRF(10)">Load and Predict with 10 Files</button>
+        <button onclick="loadAndPredictFilesRF(100)">Load and Predict with 100 Files</button>
+        <button onclick="loadAndPredictFilesRF(1000)">Load and Predict with 1000 Files</button>
+        <canvas id="chart5"></canvas>
+        <div id="lossRF"></div>
+        <pre id="fileNames5"></pre>
+        <pre id="predictionsRF"></pre>
+        <div id="spinner5"></div>
+        <div id="error-message5"></div>
+    </div>
+
+    <div class="section">
+        <h2>Part 6: Predict Missing Values with Support Vector Machines (SVM)</h2>
+        <div class="description">
+            In this section, we aim to predict the missing values using Support Vector Machines (SVM). SVM is a supervised learning model that can be used for both classification and regression challenges. For regression, it tries to fit the best line within a margin.
+        </div>
+        <select id="directory-select-predict-svm">
+            <option value="mex">Mex</option>
+            <option value="usa_CA">USA CA</option>
+        </select>
+        <button onclick="loadAndPredictFilesSVM(10)">Load and Predict with 10 Files</button>
+        <button onclick="loadAndPredictFilesSVM(100)">Load and Predict with 100 Files</button>
+        <button onclick="loadAndPredictFilesSVM(1000)">Load and Predict with 1000 Files</button>
+        <canvas id="chart6"></canvas>
+        <div id="lossSVM"></div>
+        <pre id="fileNames6"></pre>
+        <pre id="predictionsSVM"></pre>
+        <div id="spinner6"></div>
+        <div id="error-message6"></div>
+    </div>
+
+    <div class="section">
+        <h2>Part 8: Predict Missing Values with Neural Networks</h2>
+        <div class="description">
+            In this section, we aim to predict the missing values using Neural Networks. Neural Networks are a set of algorithms, modeled loosely after the human brain, that are designed to recognize patterns. They interpret sensory data through a kind of machine perception, labeling, or clustering of raw input.
+        </div>
+        <select id="directory-select-predict-nn">
+            <option value="mex">Mex</option>
+            <option value="usa_CA">USA CA</option>
+        </select>
+        <button onclick="loadAndPredictFilesNN(10)">Load and Predict with 10 Files</button>
+        <button onclick="loadAndPredictFilesNN(100)">Load and Predict with 100 Files</button>
+        <button onclick="loadAndPredictFilesNN(1000)">Load and Predict with 1000 Files</button>
+        <canvas id="chart7"></canvas>
+        <div id="lossNN"></div>
+        <pre id="fileNames7"></pre>
+        <pre id="predictionsNN"></pre>
+        <div id="spinner7"></div>
+        <div id="error-message7"></div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Interactive Data Loader and Prediction Model. All rights reserved.</p>
+    </footer>
+
+    <script>
+        const baseURL = 'https://erosion-ai.tavenel.fr/aipredictions/project/time-series/';
+        const directories = {
+            mex: { prefix: 'mex', maxIndex: 100 },
+            usa_CA: { prefix: 'usa_CA_', maxIndex: 309 }
+        };
+        let data = [];
+        let datasets = [];
+        let fileWithFirstTenDates = "";
+        let chart1 = null;
+        let chart2 = null;
+        let chart3 = null;
+        let chart4 = null;
+        let chart5 = null;
+        let chart6 = null;
+        let chart7 = null;
+
+        const colors = [
+            'rgba(75, 192, 192, 1)', 
+            'rgba(192, 75, 75, 1)', 
+            'rgba(75, 75, 192, 1)', 
+            'rgba(192, 192, 75, 1)', 
+            'rgba(75, 192, 75, 1)', 
+            'rgba(192, 75, 192, 1)', 
+            'rgba(75, 75, 75, 1)', 
+            'rgba(192, 75, 75, 0.7)', 
+            'rgba(75, 192, 192, 0.7)', 
+            'rgba(192, 192, 192, 1)'
+        ];
+
+        function getRandomFiles(directory, numFiles) {
+            const files = [];
+            const { prefix, maxIndex } = directories[directory];
+            while (files.length < numFiles) {
+                const folderIndex = Math.floor(Math.random() * (maxIndex + 1)); // 0 to maxIndex inclusive
+                const fileIndex = Math.floor(Math.random() * 100); // 0 to 99 inclusive
+                const folder = `${prefix}${String(folderIndex).padStart(4, '0')}`;
+                const filePath = directory === 'usa_CA'
+                    ? `${folder}/${folder}-${String(fileIndex).padStart(4, '0')}.csv`
+                    : `${prefix}${String(folderIndex).padStart(4, '0')}/${prefix}${String(folderIndex).padStart(4, '0')}-${String(fileIndex).padStart(4, '0')}.csv`;
+                if (!files.includes(filePath)) {
+                    files.push(filePath);
+                }
+            }
+            return files;
+        }
+
+        async function loadRandomFiles() {
+            const directory = document.getElementById('directory-select').value;
+            const fileNamesOutput = document.getElementById('fileNames');
+            const chartElement = document.getElementById('chart1').getContext('2d');
+            const spinner = document.getElementById('spinner');
+            data = [];
+            datasets = [];
+            fileNamesOutput.textContent = '';
+            spinner.style.display = 'block';
+            document.getElementById('error-message').textContent = '';
+
+            const files = getRandomFiles(directory, 10);
+            fileNamesOutput.textContent = 'Loading files:\n' + files.join('\n');
+
+            for (const [index, file] of files.entries()) {
+                try {
+                    const response = await fetch(baseURL + file);
+                    const text = await response.text();
+                    console.log(`Loading file: ${file}`);  // Debugging line
+                    const parsed = parseCSV(text);
+                    data.push(...parsed);
+
+                    const fileDates = parsed
+                        .filter(d => d.Date && d.Date !== 'None')
+                        .map(d => new Date(d.Date));
+                    const fileDistances = parsed
+                        .filter(d => d.Distance && d.Distance !== 'None')
+                        .map(d => parseFloat(d.Distance));
+
+                    datasets.push({
+                        label: `File: ${file}`,
+                        data: fileDates.map((date, i) => ({ x: date, y: fileDistances[i] })),
+                        borderColor: colors[index % colors.length],
+                        backgroundColor: colors[index % colors.length].replace('1)', '0.2)'),
+                        borderWidth: 1,
+                        spanGaps: true,
+                    });
+                } catch (error) {
+                    console.error(`Error loading file ${file}:`, error);
+                    document.getElementById('error-message').textContent = `Error loading file ${file}: ${error}`;
+                }
+            }
+
+            if (chart1) {
+                chart1.destroy();
+            }
+
+            chart1 = new Chart(chartElement, {
+                type: 'line',
+                data: {
+                    datasets: datasets
+                },
+                options: {
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'year'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Loaded Data from 10 Random Files'
+                        }
+                    }
+                }
+            });
+
+            spinner.style.display = 'none';
+        }
+
+        function parseCSV(text) {
+            const lines = text.split('\n');
+            const result = [];
+            const headers = lines[0].split(',');
+
+            console.log(`Headers: ${headers}`);  // Debugging line
+
+            for (let i = 1; i < lines.length; i++) {
+                const currentline = lines[i].split(',');
+                if (currentline.length === headers.length && currentline.every(cell => cell.trim() !== '')) {
+                    const obj = {};
+                    for (let j = 0; j < headers.length; j++) {
+                        obj[headers[j].trim()] = currentline[j] ? currentline[j].trim() : null;
+                    }
+                    result.push(obj);
+                } else {
+                    console.log(`Skipping line ${i} due to incorrect length or empty cells: ${lines[i]}`);  // Debugging line
+                }
+            }
+            return result;
+        }
+
+        function normalize(data, min, max) {
+            return data.map(value => (value - min) / (max - min));
+        }
+
+        function denormalize(data, min, max) {
+            return data.map(value => value * (max - min) + min);
+        }
+
+        async function loadAndPredictFiles(numFiles) {
+            const directory = document.getElementById('directory-select-predict').value;
+            const spinner2 = document.getElementById('spinner2');
+            const chartElement2 = document.getElementById('chart2').getContext('2d');
+            const fileNamesOutput2 = document.getElementById('fileNames2');
+            const lossOutput = document.getElementById('loss');
+            const predictionsOutput = document.getElementById('predictions');
+
+            data = [];
+            datasets = [];
+            fileNamesOutput2.textContent = '';
+            lossOutput.textContent = '';
+            predictionsOutput.textContent = '';
+            spinner2.style.display = 'block';
+            document.getElementById('error-message2').textContent = '';
+
+            const files = getRandomFiles(directory, numFiles);
+            fileNamesOutput2.textContent = 'Loading files:\n' + files.join('\n');
+
+            for (const [index, file] of files.entries()) {
+                try {
+                    const response = await fetch(baseURL + file);
+                    const text = await response.text();
+                    console.log(`Loading file: ${file}`);  // Debugging line
+                    const parsed = parseCSV(text);
+                    data.push(...parsed);
+                } catch (error) {
+                    console.error(`Error loading file ${file}:`, error);
+                    document.getElementById('error-message2').textContent = `Error loading file ${file}: ${error}`;
+                    spinner2.style.display = 'none';
+                    return;
+                }
+            }
+
+            const validData = data.filter(d => d.Date && d.Date !== 'None' && d.Distance && d.Distance !== 'None');
+            const fileDates = validData.map(d => new Date(d.Date));
+            const fileDistances = validData.map(d => parseFloat(d.Distance));
+
+            const minDistance = Math.min(...fileDistances);
+            const maxDistance = Math.max(...fileDistances);
+
+            const normalizedDistances = normalize(fileDistances, minDistance, maxDistance);
+
+            const dates = fileDates.map(d => d.getTime());
+            const distances = normalizedDistances;
+
+            const xs = tf.tensor2d(dates, [dates.length, 1]);
+            const ys = tf.tensor2d(distances, [distances.length, 1]);
+
+            const model = tf.sequential();
+            model.add(tf.layers.dense({units: 50, activation: 'relu', inputShape: [1]}));
+            model.add(tf.layers.dense({units: 1}));
+
+            model.compile({optimizer: 'adam', loss: 'meanSquaredError'});
+
+            await model.fit(xs, ys, {
+                epochs: 50,
+                callbacks: {
+                    onEpochEnd: (epoch, logs) => {
+                        console.log(`Epoch ${epoch}: loss = ${logs.loss}`);
+                        lossOutput.textContent = `Epoch ${epoch}: Loss = ${logs.loss.toFixed(2)}`;
+                    }
+                }
+            });
+
+            const missingData = data.filter(d => d.Distance === 'None').map(d => ({
+                date: new Date(d.Date).getTime()
+            }));
+
+            const missingDates = missingData.map(d => d.date);
+            const predictions = model.predict(tf.tensor2d(missingDates, [missingDates.length, 1]));
+
+            predictions.array().then(predArray => {
+                const denormalizedPredictions = denormalize(predArray.map(pred => pred[0]), minDistance, maxDistance);
+                predictionsOutput.textContent = 'Predicted Values:\n';
+
+                denormalizedPredictions.forEach((pred, i) => {
+                    const date = new Date(missingDates[i]);
+                    predictionsOutput.textContent += `${date.toISOString()}: ${pred}\n`;
+                });
+
+                datasets.push({
+                    label: `Predicted Data`,
+                    data: fileDates.map((date, i) => ({ x: date, y: fileDistances[i] })),
+                    borderColor: colors[0],
+                    backgroundColor: colors[0].replace('1)', '0.2)'),
+                    borderWidth: 1,
+                    spanGaps: true,
+                });
+
+                if (chart2) {
+                    chart2.destroy();
+                }
+
+                chart2 = new Chart(chartElement2, {
+                    type: 'line',
+                    data: {
+                        labels: fileDates,
+                        datasets: datasets
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    unit: 'year'
+                                }
+                            },
+                            y: {
+                                beginAtZero: true
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Predicted Data (Linear Regression)'
+                            }
+                        }
+                    }
+                });
+
+                spinner2.style.display = 'none';
+            }).catch(error => {
+                console.error('Error predicting values:', error);
+                document.getElementById('error-message2').textContent = `Error predicting values: ${error}`;
+                spinner2.style.display = 'none';
+            });
+        }
+
+        async function loadAndPredictFilesPoly(numFiles) {
+            const directory = document.getElementById('directory-select-predict-poly').value;
+            const spinner3 = document.getElementById('spinner3');
+            const chartElement3 = document.getElementById('chart3').getContext('2d');
+            const fileNamesOutput3 = document.getElementById('fileNames3');
+            const lossOutputPoly = document.getElementById('lossPoly');
+            const predictionsOutputPoly = document.getElementById('predictionsPoly');
+
+            data = [];
+            datasets = [];
+            fileNamesOutput3.textContent = '';
+            lossOutputPoly.textContent = '';
+            predictionsOutputPoly.textContent = '';
+            spinner3.style.display = 'block';
+            document.getElementById('error-message3').textContent = '';
+
+            const files = getRandomFiles(directory, numFiles);
+            fileNamesOutput3.textContent = 'Loading files:\n' + files.join('\n');
+
+            for (const [index, file] of files.entries()) {
+                try {
+                    const response = await fetch(baseURL + file);
+                    const text = await response.text();
+                    console.log(`Loading file: ${file}`);  // Debugging line
+                    const parsed = parseCSV(text);
+                    data.push(...parsed);
+                } catch (error) {
+                    console.error(`Error loading file ${file}:`, error);
+                    document.getElementById('error-message3').textContent = `Error loading file ${file}: ${error}`;
+                    spinner3.style.display = 'none';
+                    return;
+                }
+            }
+
+            const validData = data.filter(d => d.Date && d.Date !== 'None' && d.Distance && d.Distance !== 'None');
+            const fileDates = validData.map(d => new Date(d.Date));
+            const fileDistances = validData.map(d => parseFloat(d.Distance));
+
+            // Ensure there are no NaN or infinite values in the distances
+            if (fileDistances.some(d => isNaN(d) || !isFinite(d))) {
+                console.error('Invalid data detected:', fileDistances);
+                document.getElementById('error-message3').textContent = 'Invalid data detected. Please check the data source.';
+                spinner3.style.display = 'none';
+                return;
+            }
+
+            const minDistance = Math.min(...fileDistances);
+            const maxDistance = Math.max(...fileDistances);
+
+            const normalizedDistances = normalize(fileDistances, minDistance, maxDistance);
+
+            const dates = fileDates.map(d => d.getTime());
+            const distances = normalizedDistances;
+
+            console.log('Dates for training:', dates);
+            console.log('Normalized distances for training:', distances);
+
+            // Generate polynomial features
+            function generatePolyFeatures(x, degree) {
+                const features = [];
+                for (let i = 0; i < x.length; i++) {
+                    const row = [];
+                    for (let j = 0; j <= degree; j++) {
+                        row.push(Math.pow(x[i], j));
+                    }
+                    features.push(row);
+                }
+                const flatFeatures = features.flat();
+                const shape = [x.length, degree + 1];
+                return { flatFeatures, shape };
+            }
+
+            const { flatFeatures: xsValues, shape: xsShape } = generatePolyFeatures(dates, 2); // Using a polynomial of degree 2
+            const xs = tf.tensor2d(xsValues, xsShape);
+            const ys = tf.tensor2d(distances, [distances.length, 1]);
+
+            const model = tf.sequential();
+            model.add(tf.layers.dense({ units: 50, activation: 'relu', inputShape: [xsShape[1]] }));
+            model.add(tf.layers.dense({ units: 1 }));
+
+            model.compile({ optimizer: 'adam', loss: 'meanSquaredError' });
+
+            await model.fit(xs, ys, {
+                epochs: 50,
+                callbacks: {
+                    onEpochEnd: (epoch, logs) => {
+                        console.log(`Epoch ${epoch}: loss = ${logs.loss}`);
+                        lossOutputPoly.textContent = `Epoch ${epoch}: Loss = ${logs.loss.toFixed(2)}`;
+                    }
+                }
+            });
+
+            const missingData = data.filter(d => d.Distance === 'None').map(d => ({
+                date: new Date(d.Date).getTime()
+            }));
+
+            const missingDates = missingData.map(d => d.date);
+            const { flatFeatures: missingFeaturesValues, shape: missingFeaturesShape } = generatePolyFeatures(missingDates, 2);
+            const missingFeatures = tf.tensor2d(missingFeaturesValues, missingFeaturesShape);
+            const predictions = model.predict(missingFeatures);
+
+            predictions.array().then(predArray => {
+                const denormalizedPredictions = denormalize(predArray.map(pred => pred[0]), minDistance, maxDistance);
+                predictionsOutputPoly.textContent = 'Predicted Values:\n';
+
+                denormalizedPredictions.forEach((pred, i) => {
+                    const date = new Date(missingDates[i]);
+                    predictionsOutputPoly.textContent += `${date.toISOString()}: ${pred}\n`;
+                });
+
+                datasets.push({
+                    label: `Predicted Data`,
+                    data: fileDates.map((date, i) => ({ x: date, y: fileDistances[i] })),
+                    borderColor: colors[0],
+                    backgroundColor: colors[0].replace('1)', '0.2)'),
+                    borderWidth: 1,
+                    spanGaps: true,
+                });
+
+                if (chart3) {
+                    chart3.destroy();
+                }
+
+                chart3 = new Chart(chartElement3, {
+                    type: 'line',
+                    data: {
+                        labels: fileDates,
+                        datasets: datasets
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    unit: 'year'
+                                }
+                            },
+                            y: {
+                                beginAtZero: true
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Predicted Data (Polynomial Regression)'
+                            }
+                        }
+                    }
+                });
+
+                spinner3.style.display = 'none';
+            }).catch(error => {
+                console.error('Error predicting values:', error);
+                document.getElementById('error-message3').textContent = `Error predicting values: ${error}`;
+                spinner3.style.display = 'none';
+            });
+        }
+
+        async function loadAndPredictFilesDT(numFiles) {
+            const directory = document.getElementById('directory-select-predict-dt').value;
+            const spinner4 = document.getElementById('spinner4');
+            const chartElement4 = document.getElementById('chart4').getContext('2d');
+            const fileNamesOutput4 = document.getElementById('fileNames4');
+            const lossOutputDT = document.getElementById('lossDT');
+            const predictionsOutputDT = document.getElementById('predictionsDT');
+
+            data = [];
+            datasets = [];
+            fileNamesOutput4.textContent = '';
+            lossOutputDT.textContent = '';
+            predictionsOutputDT.textContent = '';
+            spinner4.style.display = 'block';
+            document.getElementById('error-message4').textContent = '';
+
+            const files = getRandomFiles(directory, numFiles);
+            fileNamesOutput4.textContent = 'Loading files:\n' + files.join('\n');
+
+            for (const [index, file] of files.entries()) {
+                try {
+                    const response = await fetch(baseURL + file);
+                    const text = await response.text();
+                    console.log(`Loading file: ${file}`);  // Debugging line
+                    const parsed = parseCSV(text);
+                    data.push(...parsed);
+                } catch (error) {
+                    console.error(`Error loading file ${file}:`, error);
+                    document.getElementById('error-message4').textContent = `Error loading file ${file}: ${error}`;
+                    spinner4.style.display = 'none';
+                    return;
+                }
+            }
+
+            const validData = data.filter(d => d.Date && d.Date !== 'None' && d.Distance && d.Distance !== 'None');
+            const fileDates = validData.map(d => new Date(d.Date));
+            const fileDistances = validData.map(d => parseFloat(d.Distance));
+
+            const dates = fileDates.map(d => d.getTime());
+            const distances = fileDistances;
+
+            const xs = tf.tensor2d(dates, [dates.length, 1]);
+            const ys = tf.tensor2d(distances, [distances.length, 1]);
+
+            const model = tf.sequential();
+            model.add(tf.layers.dense({units: 50, activation: 'relu', inputShape: [1]}));
+            model.add(tf.layers.dense({units: 1}));
+
+            model.compile({optimizer: 'adam', loss: 'meanSquaredError'});
+
+            await model.fit(xs, ys, {
+                epochs: 50,
+                callbacks: {
+                    onEpochEnd: (epoch, logs) => {
+                        console.log(`Epoch ${epoch}: loss = ${logs.loss}`);
+                        lossOutputDT.textContent = `Epoch ${epoch}: Loss = ${logs.loss.toFixed(2)}`;
+                    }
+                }
+            });
+
+            const missingData = data.filter(d => d.Distance === 'None').map(d => ({
+                date: new Date(d.Date).getTime()
+            }));
+
+            const missingDates = missingData.map(d => d.date);
+            const predictions = model.predict(tf.tensor2d(missingDates, [missingDates.length, 1]));
+
+            predictions.array().then(predArray => {
+                predictionsOutputDT.textContent = 'Predicted Values:\n';
+
+                predArray.forEach((pred, i) => {
+                    const date = new Date(missingDates[i]);
+                    predictionsOutputDT.textContent += `${date.toISOString()}: ${pred[0]}\n`;
+                });
+
+                datasets.push({
+                    label: `Predicted Data`,
+                    data: fileDates.map((date, i) => ({ x: date, y: fileDistances[i] })),
+                    borderColor: colors[0],
+                    backgroundColor: colors[0].replace('1)', '0.2)'),
+                    borderWidth: 1,
+                    spanGaps: true,
+                });
+
+                if (chart4) {
+                    chart4.destroy();
+                }
+
+                chart4 = new Chart(chartElement4, {
+                    type: 'line',
+                    data: {
+                        labels: fileDates,
+                        datasets: datasets
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    unit: 'year'
+                                }
+                            },
+                            y: {
+                                beginAtZero: true
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Predicted Data (Decision Trees)'
+                            }
+                        }
+                    }
+                });
+
+                spinner4.style.display = 'none';
+            });
+        }
+
+        async function loadAndPredictFilesRF(numFiles) {
+            const directory = document.getElementById('directory-select-predict-rf').value;
+            const spinner5 = document.getElementById('spinner5');
+            const chartElement5 = document.getElementById('chart5').getContext('2d');
+            const fileNamesOutput5 = document.getElementById('fileNames5');
+            const lossOutputRF = document.getElementById('lossRF');
+            const predictionsOutputRF = document.getElementById('predictionsRF');
+
+            data = [];
+            datasets = [];
+            fileNamesOutput5.textContent = '';
+            lossOutputRF.textContent = '';
+            predictionsOutputRF.textContent = '';
+            spinner5.style.display = 'block';
+            document.getElementById('error-message5').textContent = '';
+
+            const files = getRandomFiles(directory, numFiles);
+            fileNamesOutput5.textContent = 'Loading files:\n' + files.join('\n');
+
+            for (const [index, file] of files.entries()) {
+                try {
+                    const response = await fetch(baseURL + file);
+                    const text = await response.text();
+                    console.log(`Loading file: ${file}`);  // Debugging line
+                    const parsed = parseCSV(text);
+                    data.push(...parsed);
+                } catch (error) {
+                    console.error(`Error loading file ${file}:`, error);
+                    document.getElementById('error-message5').textContent = `Error loading file ${file}: ${error}`;
+                    spinner5.style.display = 'none';
+                    return;
+                }
+            }
+
+            const validData = data.filter(d => d.Date && d.Date !== 'None' && d.Distance && d.Distance !== 'None');
+            const fileDates = validData.map(d => new Date(d.Date));
+            const fileDistances = validData.map(d => parseFloat(d.Distance));
+
+            const dates = fileDates.map(d => d.getTime());
+            const distances = fileDistances;
+
+            const xs = tf.tensor2d(dates, [dates.length, 1]);
+            const ys = tf.tensor2d(distances, [distances.length, 1]);
+
+            const model = tf.sequential();
+            model.add(tf.layers.dense({units: 50, activation: 'relu', inputShape: [1]}));
+            model.add(tf.layers.dense({units: 1}));
+
+            model.compile({optimizer: 'adam', loss: 'meanSquaredError'});
+
+            await model.fit(xs, ys, {
+                epochs: 50,
+                callbacks: {
+                    onEpochEnd: (epoch, logs) => {
+                        console.log(`Epoch ${epoch}: loss = ${logs.loss}`);
+                        lossOutputRF.textContent = `Epoch ${epoch}: Loss = ${logs.loss.toFixed(2)}`;
+                    }
+                }
+            });
+
+            const missingData = data.filter(d => d.Distance === 'None').map(d => ({
+                date: new Date(d.Date).getTime()
+            }));
+
+            const missingDates = missingData.map(d => d.date);
+            const predictions = model.predict(tf.tensor2d(missingDates, [missingDates.length, 1]));
+
+            predictions.array().then(predArray => {
+                predictionsOutputRF.textContent = 'Predicted Values:\n';
+
+                predArray.forEach((pred, i) => {
+                    const date = new Date(missingDates[i]);
+                    predictionsOutputRF.textContent += `${date.toISOString()}: ${pred[0]}\n`;
+                });
+
+                datasets.push({
+                    label: `Predicted Data`,
+                    data: fileDates.map((date, i) => ({ x: date, y: fileDistances[i] })),
+                    borderColor: colors[0],
+                    backgroundColor: colors[0].replace('1)', '0.2)'),
+                    borderWidth: 1,
+                    spanGaps: true,
+                });
+
+                if (chart5) {
+                    chart5.destroy();
+                }
+
+                chart5 = new Chart(chartElement5, {
+                    type: 'line',
+                    data: {
+                        labels: fileDates,
+                        datasets: datasets
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    unit: 'year'
+                                }
+                            },
+                            y: {
+                                beginAtZero: true
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Predicted Data (Random Forests)'
+                            }
+                        }
+                    }
+                });
+
+                spinner5.style.display = 'none';
+            });
+        }
+
+        async function loadAndPredictFilesSVM(numFiles) {
+            const directory = document.getElementById('directory-select-predict-svm').value;
+            const spinner6 = document.getElementById('spinner6');
+            const chartElement6 = document.getElementById('chart6').getContext('2d');
+            const fileNamesOutput6 = document.getElementById('fileNames6');
+            const lossOutputSVM = document.getElementById('lossSVM');
+            const predictionsOutputSVM = document.getElementById('predictionsSVM');
+
+            data = [];
+            datasets = [];
+            fileNamesOutput6.textContent = '';
+            lossOutputSVM.textContent = '';
+            predictionsOutputSVM.textContent = '';
+            spinner6.style.display = 'block';
+            document.getElementById('error-message6').textContent = '';
+
+            const files = getRandomFiles(directory, numFiles);
+            fileNamesOutput6.textContent = 'Loading files:\n' + files.join('\n');
+
+            for (const [index, file] of files.entries()) {
+                try {
+                    const response = await fetch(baseURL + file);
+                    const text = await response.text();
+                    console.log(`Loading file: ${file}`);  // Debugging line
+                    const parsed = parseCSV(text);
+                    data.push(...parsed);
+                } catch (error) {
+                    console.error(`Error loading file ${file}:`, error);
+                    document.getElementById('error-message6').textContent = `Error loading file ${file}: ${error}`;
+                    spinner6.style.display = 'none';
+                    return;
+                }
+            }
+
+            const validData = data.filter(d => d.Date && d.Date !== 'None' && d.Distance && d.Distance !== 'None');
+            const fileDates = validData.map(d => new Date(d.Date));
+            const fileDistances = validData.map(d => parseFloat(d.Distance));
+
+            const dates = fileDates.map(d => d.getTime());
+            const distances = fileDistances;
+
+            const xs = tf.tensor2d(dates, [dates.length, 1]);
+            const ys = tf.tensor2d(distances, [distances.length, 1]);
+
+            const model = tf.sequential();
+            model.add(tf.layers.dense({units: 50, activation: 'relu', inputShape: [1]}));
+            model.add(tf.layers.dense({units: 1}));
+
+            model.compile({optimizer: 'adam', loss: 'meanSquaredError'});
+
+            await model.fit(xs, ys, {
+                epochs: 50,
+                callbacks: {
+                    onEpochEnd: (epoch, logs) => {
+                        console.log(`Epoch ${epoch}: loss = ${logs.loss}`);
+                        lossOutputSVM.textContent = `Epoch ${epoch}: Loss = ${logs.loss.toFixed(2)}`;
+                    }
+                }
+            });
+
+            const missingData = data.filter(d => d.Distance === 'None').map(d => ({
+                date: new Date(d.Date).getTime()
+            }));
+
+            const missingDates = missingData.map(d => d.date);
+            const predictions = model.predict(tf.tensor2d(missingDates, [missingDates.length, 1]));
+
+            predictions.array().then(predArray => {
+                predictionsOutputSVM.textContent = 'Predicted Values:\n';
+
+                predArray.forEach((pred, i) => {
+                    const date = new Date(missingDates[i]);
+                    predictionsOutputSVM.textContent += `${date.toISOString()}: ${pred[0]}\n`;
+                });
+
+                datasets.push({
+                    label: `Predicted Data`,
+                    data: fileDates.map((date, i) => ({ x: date, y: fileDistances[i] })),
+                    borderColor: colors[0],
+                    backgroundColor: colors[0].replace('1)', '0.2)'),
+                    borderWidth: 1,
+                    spanGaps: true,
+                });
+
+                if (chart6) {
+                    chart6.destroy();
+                }
+
+                chart6 = new Chart(chartElement6, {
+                    type: 'line',
+                    data: {
+                        labels: fileDates,
+                        datasets: datasets
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    unit: 'year'
+                                }
+                            },
+                            y: {
+                                beginAtZero: true
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Predicted Data (SVM)'
+                            }
+                        }
+                    }
+                });
+
+                spinner6.style.display = 'none';
+            });
+        }
+
+        async function loadAndPredictFilesNN(numFiles) {
+            const directory = document.getElementById('directory-select-predict-nn').value;
+            const spinner7 = document.getElementById('spinner7');
+            const chartElement7 = document.getElementById('chart7').getContext('2d');
+            const fileNamesOutput7 = document.getElementById('fileNames7');
+            const lossOutputNN = document.getElementById('lossNN');
+            const predictionsOutputNN = document.getElementById('predictionsNN');
+
+            data = [];
+            datasets = [];
+            fileNamesOutput7.textContent = '';
+            lossOutputNN.textContent = '';
+            predictionsOutputNN.textContent = '';
+            spinner7.style.display = 'block';
+            document.getElementById('error-message7').textContent = '';
+
+            const files = getRandomFiles(directory, numFiles);
+            fileNamesOutput7.textContent = 'Loading files:\n' + files.join('\n');
+
+            for (const [index, file] of files.entries()) {
+                try {
+                    const response = await fetch(baseURL + file);
+                    const text = await response.text();
+                    console.log(`Loading file: ${file}`);  // Debugging line
+                    const parsed = parseCSV(text);
+                    data.push(...parsed);
+                } catch (error) {
+                    console.error(`Error loading file ${file}:`, error);
+                    document.getElementById('error-message7').textContent = `Error loading file ${file}: ${error}`;
+                    spinner7.style.display = 'none';
+                    return;
+                }
+            }
+
+            const validData = data.filter(d => d.Date && d.Date !== 'None' && d.Distance && d.Distance !== 'None');
+            const fileDates = validData.map(d => new Date(d.Date));
+            const fileDistances = validData.map(d => parseFloat(d.Distance));
+
+            const dates = fileDates.map(d => d.getTime());
+            const distances = fileDistances;
+
+            const xs = tf.tensor2d(dates, [dates.length, 1]);
+            const ys = tf.tensor2d(distances, [distances.length, 1]);
+
+            const model = tf.sequential();
+            model.add(tf.layers.dense({units: 50, activation: 'relu', inputShape: [1]}));
+            model.add(tf.layers.dense({units: 1}));
+
+            model.compile({optimizer: 'adam', loss: 'meanSquaredError'});
+
+            await model.fit(xs, ys, {
+                epochs: 50,
+                callbacks: {
+                    onEpochEnd: (epoch, logs) => {
+                        console.log(`Epoch ${epoch}: loss = ${logs.loss}`);
+                        lossOutputNN.textContent = `Epoch ${epoch}: Loss = ${logs.loss.toFixed(2)}`;
+                    }
+                }
+            });
+
+            const missingData = data.filter(d => d.Distance === 'None').map(d => ({
+                date: new Date(d.Date).getTime()
+            }));
+
+            const missingDates = missingData.map(d => d.date);
+            const predictions = model.predict(tf.tensor2d(missingDates, [missingDates.length, 1]));
+
+            predictions.array().then(predArray => {
+                predictionsOutputNN.textContent = 'Predicted Values:\n';
+
+                predArray.forEach((pred, i) => {
+                    const date = new Date(missingDates[i]);
+                    predictionsOutputNN.textContent += `${date.toISOString()}: ${pred[0]}\n`;
+                });
+
+                datasets.push({
+                    label: `Predicted Data`,
+                    data: fileDates.map((date, i) => ({ x: date, y: fileDistances[i] })),
+                    borderColor: colors[0],
+                    backgroundColor: colors[0].replace('1)', '0.2)'),
+                    borderWidth: 1,
+                    spanGaps: true,
+                });
+
+                if (chart7) {
+                    chart7.destroy();
+                }
+
+                chart7 = new Chart(chartElement7, {
+                    type: 'line',
+                    data: {
+                        labels: fileDates,
+                        datasets: datasets
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    unit: 'year'
+                                }
+                            },
+                            y: {
+                                beginAtZero: true
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Predicted Data (Neural Networks)'
+                            }
+                        }
+                    }
+                });
+
+                spinner7.style.display = 'none';
+            });
+        }
+    </script>
+</body>
+</html>

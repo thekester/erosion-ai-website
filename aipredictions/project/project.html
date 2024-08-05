@@ -1,0 +1,2007 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Interactive Map of Coastline with OpenStreetMap</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Favicon for browser -->
+    <link rel="icon" type="image/png" sizes="32x32" href="../../images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../images/favicon-16x16.png">
+    <link rel="icon" type="image/x-icon" href="../images/../favicon.ico">
+
+    <!-- Favicon for Apple -->
+    <link rel="apple-touch-icon" href="../../images/apple-touch-icon.png">
+
+    <!-- Favicon for Android -->
+    <link rel="icon" type="image/png" sizes="192x192" href="../../images/android-chrome-192x192.png">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js"></script>
+    <script src="chart.js"></script>
+    <script src="chartjs-adapter-date-fns.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/date-fns/1.27.1/date_fns.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-luxon/1.0.0/chartjs-adapter-luxon.esm.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/luxon/2.1.1/luxon.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-polyfills/0.1.43/polyfill.min.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body { margin: 0; padding: 0; display: flex; }
+        #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+        #loadingScreen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.8); display: flex; justify-content: center; align-items: center; z-index: 2; font-size: 20px; color: #000; flex-direction: column;
+        }
+        #timer {
+            font-size: 16px; margin-top: 10px;
+        }
+        #popup-content {
+            width: 100%; height: 100%; /* Adjusted for full height */
+            overflow-y: auto; /* Added to allow scrolling */
+        }
+        #chart-container {
+            width: 100%; height: 500px; /* Set desired height for the chart container */
+        }
+        .loading {
+            font-size: 14px; color: #555;
+        }
+        .custom-popup, .site-popup {
+            position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            max-width: 90%;
+            max-height: 90%;
+            overflow: hidden; /* Prevent content from overflowing the popup */
+            display: flex; flex-direction: column;
+            width: 80%; /* Adjust default size */
+            height: 80%; /* Adjust default size */
+            resize: both; /* Make the popup resizable */
+            overflow: auto; /* Allow content to scroll if it overflows */
+        }
+        .custom-popup-close {
+            cursor: pointer; 
+            font-size: 18px; 
+            align-self: flex-end;
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .custom-popup-close:hover {
+            background-color: darkred;
+        }
+        .custom-popup-header {
+            display: flex; justify-content: space-between; align-items: center; width: 100%;
+            background: #f1f1f1; /* Ensure the header stands out */
+            padding: 10px; /* Add some padding */
+            box-sizing: border-box; /* Include padding in width calculations */
+            cursor: move; /* Indicate draggable area */
+            flex-shrink: 0; /* Prevent the header from shrinking */
+        }
+        .custom-popup-title {
+            font-size: 20px; font-weight: bold; margin: 0;
+        }
+        .custom-popup-body {
+            flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            overflow-y: auto; /* Enable vertical scrolling */
+            padding: 10px; /* Add some padding for content */
+            box-sizing: border-box; /* Include padding in width calculations */
+        }
+        .custom-popup-footer {
+            text-align: center; margin-top: 10px;
+            flex-shrink: 0; /* Prevent the footer from shrinking */
+        }
+        .back-button, .action-button {
+            background-color: #007bff; /* Bootstrap Primary Color */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+        .back-button:hover, .action-button:hover {
+            background-color: #0056b3; /* Darker shade of blue */
+        }
+        .back-button:focus, .action-button:focus {
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+        aside {
+            position: fixed; top: 0; left: 0; width: 300px; height: 100%; background: #f8f9fa; padding: 15px; box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); z-index: 1000; transition: transform 0.3s ease;
+        }
+        aside.hidden {
+            transform: translateX(-100%);
+        }
+        aside .header {
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        aside .header h2 {
+            margin: 0; font-size: 18px;
+        }
+        aside .header button {
+            cursor: pointer; background: none; border: none; font-size: 18px;
+        }
+        aside .content {
+            margin-top: 15px; flex: 1;
+        }
+        #open-sidebar-btn {
+            position: fixed; top: 20px; left: 20px; background: #007bff; color: white; border: none; border-radius: 4px; padding: 10px 15px; cursor: pointer; z-index: 1000; display: none;
+        }
+        #chart-container canvas {
+            width: 95% !important; /* Adjust the canvas to be 95 of the container */
+            height: 300px; /* Adjust the height to auto */
+            margin: auto !important;
+        }
+        #site-chart-container canvas {
+            width: 95% !important; /* Adjust the canvas to be 95 of the container */
+            height: 300px; /* Adjust the height to auto */
+            margin: auto !important;
+        }
+        .video-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+        }
+        .video-container video {
+            max-width: 100%;
+            max-height: 100%;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        #close-comparison, #close-comparison2 {
+            cursor: pointer;
+            font-size: 18px;
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #close-comparison:hover, #close-comparison2:hover {
+            background-color: darkred;
+        }
+        #close-comparison:focus, #close-comparison2:focus {
+            outline: none;
+            box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+        }
+        .mapboxgl-marker {
+            cursor: pointer;
+        }  
+
+        /* Media query pour les écrans de téléphones */
+        @media (max-width: 768px) {
+            .video-container {
+                height: 300px;
+            }
+        }
+
+        .custom-popup-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    overflow-y: auto;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+#chart-container {
+    width: 100%;
+    height: 500px; /* Adjust the height for the chart container */
+    margin-bottom: 20px;
+}
+
+.welcome-message {
+        background-color: #f0f8ff;
+        border: 1px solid #007bff;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    .welcome-message h2 {
+        margin: 0;
+        color: #007bff;
+    }
+    .welcome-message p {
+        margin: 5px 0 0;
+        font-size: 16px;
+    }
+
+    </style>
+</head>
+<body>
+    <aside id="sidebar">
+        <div class="header">
+            <h2>Project Details</h2>
+            <button onclick="toggleSidebar()">×</button>
+        </div>
+        <div class="content">
+            <p>Hello, this project is inspired by <a href="http://coastsat.wrl.unsw.edu.au/" target="_blank">CoastSat</a>.</p>
+            <p>This project provides interactive maps of coastlines based on satellite data.</p>
+            <p>I'm working on making AI predictions to forecast the future coastline with the data we currently have.</p>
+            <p>I am a visiting researcher at the University of Strathclyde for 9 weeks.</p>
+            <p>My research topic is entitled "Interactive Coastal Erosion Map with AI Predictions."</p>
+            <p><a href="https://oceanclimateinfo.wixsite.com/home/members" target="_blank">Check this link to see where I am.</a></p>
+        </div>
+    </aside>
+    <button id="open-sidebar-btn" onclick="toggleSidebar()">☰ Open Sidebar</button>
+    <div id="map"></div>
+    <div id="loadingScreen">
+        Loading data ...
+        <div id="timer">6:00</div>
+    </div>
+    <div id="custom-popup" class="custom-popup" style="display:none;">
+        <div class="custom-popup-header" id="popup-header">
+            <h2 class="custom-popup-title">Site Information</h2>
+            <span class="custom-popup-close" onclick="closePopup()">×</span>
+        </div>
+        <div id="popup-content" class="custom-popup-body"></div>
+    </div>
+    <div id="site-popup" class="custom-popup" style="display:none;">
+        <div class="custom-popup-header" id="site-popup-header">
+            <h2 class="custom-popup-title">Site Information</h2>
+            <span class="custom-popup-close" onclick="closeSitePopup()">×</span>
+        </div>
+        <div id="site-popup-content" class="custom-popup-body"></div>
+    </div>
+    <script>
+        mapboxgl.accessToken = 'Your mapbox access token';
+
+        var map = new mapboxgl.Map({
+            container: 'map',
+            center: [-118.2437, 34.0522], // Centered on Los Angeles
+            zoom: 10,
+            pitch: 80,
+            bearing: 41,
+            style: 'mapbox://styles/mapbox/satellite-streets-v12'
+        });
+
+        var loadingScreen = document.getElementById('loadingScreen');
+        var timerElement = document.getElementById('timer');
+        var timerInterval; // Define globally
+        var customPopup = document.getElementById('custom-popup');
+        var popupHeader = document.getElementById('popup-header');
+        var popupContent = document.getElementById('popup-content');
+        var sitePopup = document.getElementById('site-popup');
+        var sitePopupContent = document.getElementById('site-popup-content');
+        var currentChart=null; // Define globally
+        var openSidebarBtn = document.getElementById('open-sidebar-btn');
+        var offsetX, offsetY; // Variables for storing mouse offset
+        var isDragging = false; // Flag to indicate dragging
+
+        function hideLoadingScreen() {
+            loadingScreen.style.display = 'none';
+        }
+
+        function showLoadingScreen() {
+            loadingScreen.style.display = 'flex';
+        }
+
+        function startLoadingTimer() {
+            showLoadingScreen();
+            var countdown = 6 * 60; // 6 minutes in seconds
+
+            timerInterval = setInterval(function() {
+                var minutes = Math.floor(countdown / 60);
+                var seconds = countdown % 60;
+                timerElement.textContent = minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+                countdown--;
+
+                if (countdown < 0) {
+                    clearInterval(timerInterval);
+                    hideLoadingScreen();
+                    centerMapOnLosAngeles(); // Recenter the map on Los Angeles
+                }
+            }, 1000);
+        }
+
+        // Rotate map during loading with zoom oscillation
+        var rotationAngle = 0;
+        var zoomDirection = 1;
+        var minZoom = 9;
+        var maxZoom = 11;
+        function rotateMap() {
+            rotationAngle += 1;
+            if (rotationAngle >= 360) rotationAngle = 0;
+            map.rotateTo(rotationAngle, { duration: 100 });
+
+            var currentZoom = map.getZoom();
+            if (zoomDirection === 1) {
+                map.zoomTo(currentZoom + 0.02, { duration: 100 });
+                if (currentZoom >= maxZoom) zoomDirection = -1;
+            } else {
+                map.zoomTo(currentZoom - 0.02, { duration: 100 });
+                if (currentZoom <= minZoom) zoomDirection = 1;
+            }
+
+            if (loadingScreen.style.display !== 'none') {
+                setTimeout(rotateMap, 100);
+            }
+        }
+
+        function centerMapOnLosAngeles() {
+            map.flyTo({
+                center: [-118.2437, 34.0522],
+                zoom: 10,
+                pitch: 0,
+                bearing: 180, // Rotate 180 degrees
+                duration: 2000
+            });
+        }
+       
+        function createPopupContent(transectId, siteName) {
+    popupContent.innerHTML = ''; // Clear previous content
+    var transectInfo = document.createElement('p');
+    transectInfo.id = 'transect-info';
+    transectInfo.innerText = `Transect ID: ${transectId}`;
+    popupContent.appendChild(transectInfo);
+
+    const filePath = `https://erosion-ai.tavenel.fr/aipredictions/project/time-series/${transectId.split('-')[0]}/${transectId}.csv`;
+    checkFileExistence(filePath, transectId, popupContent, siteName);
+}
+
+
+function checkFileExistence(filePath, transectId, container, siteName) {
+    fetch(filePath)
+        .then(fileResponse => {
+            console.log(`Checking existence of ${filePath}`);
+            console.log(`Status: ${fileResponse.status}`);
+            if (fileResponse.ok) {
+                console.log(`${filePath} exists.`);
+                const buttonContainer = document.createElement('div');
+                buttonContainer.style.display = 'flex';
+                buttonContainer.style.gap = '10px';
+                
+                const buttonDistance = document.createElement('button');
+                buttonDistance.className = 'action-button';
+                buttonDistance.innerHTML = 'Show Cross-shore Distance';
+                buttonDistance.onclick = function () {
+                    loadChart(transectId, container, 'distance', siteName);
+                };
+
+                const buttonChange = document.createElement('button');
+                buttonChange.className = 'action-button';
+                buttonChange.innerHTML = 'Show Cross-shore Change';
+                buttonChange.onclick = function () {
+                    loadChart(transectId, container, 'change', siteName);
+                };
+
+
+                buttonContainer.appendChild(buttonDistance);
+                buttonContainer.appendChild(buttonChange);
+                container.appendChild(buttonContainer);
+            } else {
+                throw new Error('File not found');
+            }
+        })
+        .catch(error => {
+            console.error(`Error checking file existence: ${error}`);
+            displayDownloadLink(container, filePath, transectId);
+        });
+}
+
+
+      
+function showBackButton(chartContainer, transectId) {
+    console.log('Showing back button');
+    const buttonBack = document.createElement('button');
+    buttonBack.className = 'back-button'; // Add class for styling
+    buttonBack.innerHTML = 'Back';
+    buttonBack.onclick = function () {
+        console.log('Back button clicked');
+        resetButtons(transectId, chartContainer);
+    };
+    chartContainer.appendChild(buttonBack);
+}
+function resetButtons(transectId, chartContainer, siteName) {
+    console.log('Resetting buttons');
+    chartContainer.innerHTML = ''; // Clear previous content
+    if (currentChart && typeof currentChart.destroy === 'function') {
+        console.log('Destroying current chart');
+        currentChart.destroy(); // Destroy existing chart instance
+        currentChart = null; // Clear the current chart reference
+    } else {
+        console.log('No current chart to destroy or destroy is not a function');
+    }
+
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.display = 'flex';
+    buttonContainer.style.gap = '10px';
+
+    const buttonDistance = document.createElement('button');
+    buttonDistance.className = 'action-button'; // Add class for styling
+    buttonDistance.innerHTML = 'Show Cross-shore Distance';
+    buttonDistance.onclick = function () {
+        loadChart(transectId, chartContainer, 'distance', siteName);
+    };
+
+    const buttonChange = document.createElement('button');
+    buttonChange.className = 'action-button'; // Add class for styling
+    buttonChange.innerHTML = 'Show Cross-shore Change';
+    buttonChange.onclick = function () {
+        loadChart(transectId, chartContainer, 'change', siteName);
+    };
+
+    buttonContainer.appendChild(buttonDistance);
+    buttonContainer.appendChild(buttonChange);
+    chartContainer.appendChild(buttonContainer);
+}
+
+        function displayDownloadLink(chartContainer, filePath, transectId) {
+            // Extract and transform transectId to the new URL format
+            const baseId = transectId.split('-')[0];
+            const newUrl = `http://coastsat.wrl.unsw.edu.au/time-series/${baseId}-${transectId.split('-')[1]}/`;
+            
+            const content = document.createElement('div');
+            content.innerHTML = `
+                <p>File ${filePath} doesn't exist locally. Please download the file here:</p>
+                <a href="${newUrl}" target="_blank">Download Data from CoastSat</a>
+            `;
+            chartContainer.appendChild(content);
+        }
+
+        function loadChart(transectId, container, type, siteName) {
+    console.log('Loading chart for', transectId, 'with type', type);
+    container.innerHTML = ''; // Clear previous content
+
+    // Show welcome message
+    showWelcomeMessage(container, `Show ${type === 'change' ? 'Cross-shore Change' : 'Cross-shore Distance'}`, transectId, siteName);
+
+    // Create back button
+    const buttonBack = document.createElement('button');
+    buttonBack.className = 'back-button'; // Add class for styling
+    buttonBack.innerHTML = 'Back';
+    buttonBack.style.marginRight = '90%';
+    buttonBack.style.marginTop = '2%';
+    buttonBack.style.marginBottom = '-1%';
+    buttonBack.onclick = function () {
+        console.log('Back button clicked');
+        resetButtons(transectId, container, siteName);
+    };
+    container.appendChild(buttonBack);
+
+    const forecastContainer = document.createElement('div');
+    const forecastLabel = document.createElement('label');
+    forecastLabel.setAttribute('for', 'forecast-method');
+    forecastLabel.innerText = 'Select Forecasting Method:';
+    forecastContainer.appendChild(forecastLabel);
+
+    const forecastSelect = document.createElement('select');
+    forecastSelect.id = 'forecast-method';
+    forecastSelect.innerHTML = `
+        <option value="no">No Forecasting</option>
+        <option value="naive">Naïve</option>
+        <option value="snaive">SNaïve</option>
+        <option value="seasonaldecomposition">Seasonal Decomposition</option>
+        <option value="statespacemodel">State Space Model</option>
+        <option value="holtWinters">Holt-Winters</option>
+    `;
+    forecastContainer.appendChild(forecastSelect);
+
+    const directionLabel = document.createElement('label');
+    directionLabel.setAttribute('for', 'forecast-direction');
+    directionLabel.innerText = 'Select Prediction Mode:';
+    forecastContainer.appendChild(directionLabel);
+
+    const directionSelect = document.createElement('select');
+    directionSelect.id = 'forecast-direction';
+    directionSelect.innerHTML = `
+        <option value="both">Both</option>
+        <option value="past">Past</option>
+        <option value="future">Future</option>
+    `;
+    forecastContainer.appendChild(directionSelect);
+
+    const applyButton = document.createElement('button');
+    applyButton.innerText = 'Apply Forecasting';
+    applyButton.onclick = function() {
+        applyForecasting(transectId, container, type, siteName);
+    };
+    forecastContainer.appendChild(applyButton);
+
+    container.appendChild(forecastContainer);
+
+    const chartDiv = document.createElement('div');
+    chartDiv.id = 'chart-container';
+    chartDiv.style.width = '100%';
+    chartDiv.style.height = '500px'; // Adjusted height for the chart
+    container.appendChild(chartDiv);
+
+    const filePath = `https://erosion-ai.tavenel.fr/aipredictions/project/time-series/${transectId.split('-')[0]}/${transectId}.csv`;
+
+    fetch(filePath)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Local time series data not found');
+            }
+            return response.text();
+        })
+        .then(csvText => {
+            const rows = csvText.split('\n');
+            const dates = [];
+            const distances = [];
+            rows.forEach((row, index) => {
+                const columns = row.split(',');
+                if (columns.length === 2 && columns[1] !== 'None' && columns[1] !== '') {
+                    dates.push(columns[0]);
+                    distances.push(parseFloat(columns[1]));
+                }
+            });
+
+            const changes = distances.map((distance, index) => {
+                if (index === 0) return 0;
+                return distance - distances[index - 1];
+            });
+
+            const dataToShow = type === 'change' ? changes : distances;
+            const linearTrend = calculateLinearTrend(dataToShow);
+
+            return { transectId, dates, dataToShow, linearTrend, numberOfPoints: distances.length };
+        })
+        .then(chartData => {
+            if (currentChart && currentChart instanceof Chart) {
+                console.log('Destroying current chart before creating a new one');
+                currentChart.destroy(); // Destroy existing chart instance
+                currentChart = null; // Clear the current chart reference
+            } else {
+                console.log('No current chart to destroy or destroy is not a function');
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.id = 'chart';
+            var ctx = canvas.getContext('2d');
+            chartDiv.appendChild(canvas);
+
+            currentChart = createChart(chartData, type, ctx);
+
+            const infoContainer = document.createElement('div');
+            infoContainer.innerHTML = `
+                <p>Number of Data Points: ${chartData.numberOfPoints}</p>
+                <p>Linear Trend: ${chartData.linearTrend.slope.toFixed(2)} (beach slope), ${chartData.linearTrend.intercept.toFixed(2)} (intercept)</p>
+                <p>The beach slope \\(m\\) indicates the rate of change in the shoreline position over time, while the intercept \\(b\\) is the initial position of the shoreline at the start of the measurement.</p>
+                <p>The equation for a line, which represents the linear trend of the shoreline changes, is given by \\( y = mx + b \\), where:</p>
+                <ul>
+                    <li>\\( y \\) is the dependent variable (e.g., Cross-shore Distance or Change)</li>
+                    <li>\\( x \\) is the independent variable (e.g., Time)</li>
+                    <li>\\( m \\) is the beach slope</li>
+                    <li>\\( b \\) is the y-intercept</li>
+                </ul>
+            `;
+            chartDiv.appendChild(infoContainer);
+
+            MathJax.typeset(); // Render the MathJax equations
+        })
+        .catch(error => {
+            console.error(`Error loading chart data: ${error}`);
+            chartDiv.innerHTML = 'Error loading data';
+        });
+}
+
+
+
+        function calculateLinearTrend(data) {
+            const validData = data.filter(value => !isNaN(value));
+            const n = validData.length;
+            if (n === 0) {
+                return { slope: NaN, intercept: NaN };
+            }
+
+            const x = Array.from({ length: n }, (_, i) => i);
+            const sumX = x.reduce((a, b) => a + b, 0);
+            const sumY = validData.reduce((a, b) => a + b, 0);
+            const sumXY = validData.reduce((sum, y, i) => sum + x[i] * y, 0);
+            const sumX2 = x.reduce((sum, xi) => sum + xi * xi, 0);
+
+            const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+            const intercept = (sumY - slope * sumX) / n;
+
+            return { slope, intercept };
+        }
+
+        function createChart(chartData, type) {
+            var canvas = document.getElementById('chart');
+            var ctx = canvas.getContext('2d');
+
+            const linearTrendLine = chartData.dates.map((_, i) => chartData.linearTrend.slope * i + chartData.linearTrend.intercept);
+
+            currentChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartData.dates,
+                    datasets: [{
+                        label: type === 'change' ? 'Cross-shore Change' : 'Cross-shore Distance',
+                        data: chartData.dataToShow,
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1,
+                        fill: false
+                    }, {
+                        label: 'Linear Trend',
+                        data: linearTrendLine,
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1,
+                        fill: false,
+                        borderDash: [10, 5]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    title: {
+                        display: true,
+                        text: 'Shoreline Time Series'
+                    },
+                    tooltips: {
+                        callbacks: {
+                            label: function(tooltipItem, data) {
+                                const date = chartData.dates[tooltipItem.index];
+                                const value = chartData.dataToShow[tooltipItem.index];
+                                return `Date: ${date}, Value: ${value}`;
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Year'
+                            },
+                            type: 'time',
+                            time: {
+                                unit: 'year',
+                                tooltipFormat: 'yyyy-MM-dd',
+                                displayFormats: {
+                                    year: 'yyyy'
+                                }
+                            }
+                        },
+                        y: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: type === 'change' ? 'Cross-shore Change (m)' : 'Cross-shore Distance (m)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            return canvas;
+        }
+
+
+        function showTransectsOnMap(data, siteName) {
+    if (map.getSource('transects')) {
+        map.removeLayer('transects');
+        map.removeSource('transects');
+    }
+
+    map.addSource('transects', {
+        'type': 'geojson',
+        'data': data
+    });
+
+    map.addLayer({
+        'id': 'transects',
+        'type': 'line',
+        'source': 'transects',
+        'layout': {},
+        'paint': {
+            'line-color': '#FF0000',
+            'line-width': 4
+        }
+    });
+
+    map.on('mouseenter', 'transects', function () {
+        map.setPaintProperty('transects', 'line-width', 4);
+        map.getCanvas().style.cursor = 'pointer';
+    });
+
+    map.on('mouseleave', 'transects', function () {
+        map.setPaintProperty('transects', 'line-width', 2);
+        map.getCanvas().style.cursor = '';
+    });
+
+    map.on('click', 'transects', function (e) {
+        const coordinates = e.lngLat;
+        const properties = e.features[0].properties;
+        if (properties.TransectId) {
+            const transectId = properties.TransectId;
+            console.log(`Transect clicked: ${transectId}`);
+            showPopup(transectId, siteName);
+        }
+    });
+}
+
+
+function showPopup(transectId, siteName) {
+    customPopup.style.display = 'block';
+    createPopupContent(transectId, siteName);
+}
+
+
+        function closePopup() {
+            customPopup.style.display = 'none';
+        }
+
+        function toggleSidebar() {
+            var sidebar = document.getElementById('sidebar');
+            var openBtn = document.getElementById('open-sidebar-btn');
+            sidebar.classList.toggle('hidden');
+            if (sidebar.classList.contains('hidden')) {
+                openBtn.style.display = 'block';
+            } else {
+                openBtn.style.display = 'none';
+            }
+        }
+
+
+function compareImages(siteName, url, file1, file2, type) {
+    const comparisonresult = document.getElementById('comparison-result');
+    comparisonresult.style.display = 'flex';
+    comparisonresult.style.flexDirection = 'column';
+    const select1 = document.getElementById('image-select-1');
+    const select2 = document.getElementById('image-select-2');
+    const img1 = select1.value;
+    const img2 = select2.value;
+
+    if (img1 && img2) {
+        if (type === 'sonel') {
+            const date1 = img1.split('/').pop().split('_')[0];
+            const date2 = img2.split('/').pop().split('_')[0];
+            Promise.all([
+                fetchTideData(file1, date1),
+                fetchTideData(file2, date1),
+                fetchTideData(file1, date2),
+                fetchTideData(file2, date2)
+            ]).then(([seaLevel1File1, seaLevel1File2, seaLevel2File1, seaLevel2File2]) => {
+                displayComparisonResult(img1, img2, seaLevel1File1, seaLevel1File2, seaLevel2File1, seaLevel2File2, url);
+            });
+        } else {
+            displayComparisonResult(img1, img2, 'N/A', 'N/A', 'N/A', 'N/A', url);
+        }
+    }
+}
+
+
+function fetchTideData(fileUrl, date) {
+    // Extraire la partie date au format YYYY-MM-DD
+    const formattedDate = date.split('-').slice(0, 3).join('-');
+    console.log(formattedDate);
+
+    return fetch(fileUrl)
+        .then(response => response.text())
+        .then(text => {
+            const rows = text.split('\n');
+            for (const row of rows) {
+                const [rowDate, seaLevel] = row.split('\t');
+                if (rowDate === formattedDate) {
+                    return seaLevel;
+                }
+            }
+            return 'Data not found';
+        });
+}
+
+function displayComparisonResult(img1, img2, seaLevel1File1, seaLevel1File2, seaLevel2File1, seaLevel2File2, url) {
+    const comparisonResult = document.getElementById('comparison-result');
+    comparisonResult.innerHTML = `
+        <button id="close-comparison" onclick="closecomparison()">Close comparing two images section</button>
+        <h4>Image Comparison</h4>
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div>
+                <h5>${img1.split('/').pop()}</h5>
+                <img src="${img1}" style="max-width: 100%; height: 600px; border: 1px solid #ccc; border-radius: 8px;" />
+                <p>Sea Level from file1: ${seaLevel1File1} mm</p>
+                <p>Sea Level from file2: ${seaLevel1File2} mm</p>
+                <p>URL: <a href="${url}" target="_blank">${url}</a></p>
+            </div>
+            <div>
+                <h5>${img2.split('/').pop()}</h5>
+                <img src="${img2}" style="max-width: 100%; height: 600px; border: 1px solid #ccc; border-radius: 8px;" />
+                <p>Sea Level from file1: ${seaLevel2File1} mm</p>
+                <p>Sea Level from file2: ${seaLevel2File2} mm</p>
+                <p>URL: <a href="${url}" target="_blank">${url}</a></p>
+            </div>
+        </div>
+        <button id="close-comparison2" onclick="closecomparison()">Close comparing two images section</button>
+        <div style="height:50px;">
+        </div>
+    `;
+}
+    function closecomparison() {
+        const comparisonResult = document.getElementById('comparison-result');
+        comparisonResult.style.display = 'none';
+    }
+
+
+        map.on('load', function () {
+            startLoadingTimer();
+            rotateMap(); // Start rotating the map
+
+            // Load GeoJSON files
+            const geojsonFiles = [
+                'CoastSat_metadata_layer_Pacific.geojson',
+                'CoastSat_polygon_layer.geojson',
+                'CoastSat_shoreline_layer.geojson',
+                'usa.geojson'
+            ];
+
+            geojsonFiles.forEach((file, index) => {
+                fetch(file)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Fetched GeoJSON data:", data);
+
+                        map.addSource(`coastline${index}`, {
+                            'type': 'geojson',
+                            'data': data
+                        });
+
+                        map.addLayer({
+                            'id': `coastline${index}`,
+                            'type': 'line',
+                            'source': `coastline${index}`,
+                            'layout': {},
+                            'paint': {
+                                'line-color': index === 3 ? '#800080' : ['#FF0000', '#00FF00', '#0000FF', '#FFFF00'][index],
+                                'line-width': 5
+                            }
+                        });
+
+                        // Change cursor to pointer when over shorelines
+                        map.on('mouseenter', `coastline${index}`, function () {
+                            map.setPaintProperty(`coastline${index}`, 'line-width', 5);
+                            map.getCanvas().style.cursor = 'pointer';
+                        });
+
+                        map.on('mouseleave', `coastline${index}`, function () {
+                            map.setPaintProperty(`coastline${index}`, 'line-width', 3);
+                            map.getCanvas().style.cursor = '';
+                        });
+
+                        // Add click event to load and show transects
+                        map.on('click', `coastline${index}`, function (e) {
+                            const coordinates = e.lngLat;
+                            const properties = e.features[0].properties;
+                            if (index === 3) {
+                                new mapboxgl.Popup()
+                                    .setLngLat(e.lngLat)
+                                    .setHTML('OpenStreetMap coastline 2024')
+                                    .addTo(map);
+                            }
+                            if (properties.SiteId) {
+                                fetch('CoastSat_transect_layer.geojson')
+                                .then(response => response.json())
+                                .then(transectData => {
+                                    // Filter transects that match the SiteId
+                                    const filteredTransects = {
+                                        type: 'FeatureCollection',
+                                        features: transectData.features.filter(feature => feature.properties.SiteId === properties.SiteId)
+                                    };
+                                    showTransectsOnMap(filteredTransects, properties.SiteId);
+                                });
+                            }
+                        });
+
+                        if (index === geojsonFiles.length - 1) {
+                            hideLoadingScreen(); // Hide loading screen once data is ready
+                            clearInterval(timerInterval); // Stop the countdown
+                            centerMapOnLosAngeles(); // Recenter the map on Los Angeles
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error fetching GeoJSON data:", error);
+                        loadingScreen.textContent = 'Error loading data';
+                        clearInterval(timerInterval); // Stop the countdown in case of error
+                    });
+            });
+
+            function createSitePopupContent(siteId, medianSlope, meanTrend) {
+                const sitePopupContent = `
+                    <h3>SiteId: ${siteId}</h3>
+                    <p>MedianSlope: ${medianSlope}</p>
+                    <p>MeanTrend: ${meanTrend}</p>
+                    <button onclick="showSitePopup('${siteId}')">Study all Transects</button>
+                `;
+                return sitePopupContent;
+            }
+
+
+            // Add click event for CoastSat_shoreline_layer.geojson to show MedianSlope, MeanTrend, and SiteId
+            map.on('click', 'coastline2', function (e) {
+                const coordinates = e.lngLat;
+                const properties = e.features[0].properties;
+                const sitePopupContent = createSitePopupContent(properties.SiteId, properties.MedianSlope, properties.MeanTrend);
+                const popup = new mapboxgl.Popup()
+                    .setLngLat(coordinates)
+                    .setHTML(sitePopupContent)
+                    .addTo(map);
+            });
+
+              // Function to open custom popup
+function openCustomPopup(siteName, mp4Url) {
+    popupContent.innerHTML = `
+        <h3>${siteName}</h3>
+        <div id="popup-video" class="video-container">
+            <video controls>
+                <source src="${mp4Url}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        <div class="download-link">
+            <a href="${mp4Url}" target="_blank" download>Download Video</a>
+        </div>
+    `;
+
+    // Add event listener after the popup content is set
+    var popupVideo = document.getElementById('popup-video');
+    popupVideo.addEventListener('mousedown', function(e) {
+        e.stopPropagation(); // Prevent mousedown from propagating to the popup header
+        isDragging = false;
+
+    });
+
+    popupVideo.addEventListener('mouseup', function(e) {
+        e.stopPropagation(); // Prevent mouseup from propagating to the document
+        isDragging = false;
+
+    });
+
+    // Fetch tide data
+    fetch('tides_data.json')
+        .then(response => response.json())
+        .then(tidesData => {
+            const siteTideData = tidesData.sites.find(site => site.sitename === siteName);
+            if (siteTideData) {
+                const { url, file1, file2, type } = siteTideData;
+                const imagesDir = `https://erosion-ai.tavenel.fr/aipredictions/project/data/${siteName}/jpg_files/detection/`;
+
+                fetch(imagesDir)
+                    .then(response => {
+                        if (response.ok) {
+                            return response.text();
+                        } else {
+                            throw new Error('Directory not found');
+                        }
+                    })
+                    .then(text => {
+                        try {
+                            const imageList = parseDirectoryListing(text);
+                            if (imageList.length > 0) {
+                                const imageSelectContainer = document.createElement('div');
+                                imageSelectContainer.innerHTML = `
+                                    <h4>Select Images to Compare</h4>
+                                    <select id="image-select-1">
+                                        ${imageList.map(img => `<option value="${imagesDir}${img}">${img}</option>`).join('')}
+                                    </select>
+                                    <select id="image-select-2">
+                                        ${imageList.map(img => `<option value="${imagesDir}${img}">${img}</option>`).join('')}
+                                    </select>
+                                    <button class="action-button" onclick="compareImages('${siteName}', '${url}', '${file1}', '${file2}', '${type}')">Compare</button>
+                                    <div style="height:50px;"></div>
+                                    <div id="comparison-result"></div>
+                                `;
+                                popupContent.appendChild(imageSelectContainer);
+                            } else {
+                                const noImagesMessage = document.createElement('p');
+                                noImagesMessage.innerText = 'No images available for comparison.';
+                                popupContent.appendChild(noImagesMessage);
+                            }
+                        } catch (e) {
+                            throw new Error('Failed to parse directory listing: ' + e.message);
+                        }
+                    })
+                    .catch(error => {
+                        const errorMessage = document.createElement('p');
+                        errorMessage.innerText = 'Error loading images for comparison.';
+                        popupContent.appendChild(errorMessage);
+                        console.error(error);
+                    });
+            } else {
+                const noTideDataMessage = document.createElement('p');
+                noTideDataMessage.innerText = 'No tide data available for this site.';
+                popupContent.appendChild(noTideDataMessage);
+            }
+        })
+        .catch(error => {
+            const errorMessage = document.createElement('p');
+            errorMessage.innerText = 'Error loading tide data.';
+            popupContent.appendChild(errorMessage);
+            console.error(error);
+        });
+
+    customPopup.style.display = 'block';
+}
+
+
+    function closeCustomPopup() {
+        document.getElementById('custom-popup').style.display = 'none';
+    }
+
+    // Function to parse HTML directory listing and extract image file names
+
+// Function to parse HTML directory listing and extract image file names
+function parseDirectoryListing(htmlText) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlText, 'text/html');
+    const links = doc.querySelectorAll('a');
+    const imageList = [];
+
+    links.forEach(link => {
+        const href = link.getAttribute('href');
+        if (href.endsWith('.jpg') || href.endsWith('.jpeg') || href.endsWith('.png')) {
+            imageList.push(href);
+        }
+    });
+
+    return imageList;
+}
+
+    // Load site data and video URLs
+    Promise.all([
+        fetch('sites_data.json')
+            .then(response => {
+                console.log("Fetched sites_data.json");
+                return response.json();
+            })
+            .catch(error => {
+                console.error("Error fetching sites_data.json:", error);
+                throw error;
+            }),
+        fetch('mp4.json')
+            .then(response => {
+                console.log("Fetched mp4.json");
+                return response.json();
+            })
+            .catch(error => {
+                console.error("Error fetching mp4.json:", error);
+                throw error;
+            })
+    ])
+    .then(([siteData, mp4Data]) => {
+        console.log("Both JSON files fetched successfully");
+        console.log("siteData:", siteData);
+        console.log("mp4Data:", mp4Data);
+
+        const mp4Map = mp4Data.sites.reduce((map, obj) => {
+            map[obj.sitename] = obj.mp4;
+            return map;
+        }, {});
+
+        console.log("mp4Map:", mp4Map);
+
+        siteData.sites.forEach(site => {
+            const coordinates = site.polygon[0][0]; // Choose the first coordinate of the polygon
+            const mp4Url = mp4Map[site.sitename];
+
+            // Draw the polygon on the map
+            map.addLayer({
+                'id': `polygon-${site.sitename}`,
+                'type': 'line',
+                'source': {
+                    'type': 'geojson',
+                    'data': {
+                        'type': 'Feature',
+                        'geometry': {
+                            'type': 'Polygon',
+                            'coordinates': site.polygon
+                        }
+                    }
+                },
+                'layout': {},
+                'paint': {
+                    'line-color': '#FF7F00', // Orange color
+                    'line-width': 2
+                }
+            });
+
+
+            if (mp4Url) {
+                console.log(`Adding marker for site: ${site.sitename} at coordinates: ${coordinates}`);
+                const markerElement = document.createElement('div');
+                markerElement.className = 'marker';
+                markerElement.style.backgroundImage = 'url(https://docs.mapbox.com/help/demos/custom-markers-gl-js/mapbox-icon.png)';
+                markerElement.style.width = '30px';
+                markerElement.style.height = '30px';
+                markerElement.style.backgroundSize = '100%';
+                markerElement.cursor = 'pointer';
+
+                const marker = new mapboxgl.Marker(markerElement)
+                    .setLngLat(coordinates)
+                    .addTo(map);
+
+                markerElement.addEventListener('click', () => openCustomPopup(site.sitename, mp4Url));
+            } else {
+                console.log(`No video for site: ${site.sitename}`);
+            }
+        });
+    })
+    .catch(error => {
+        console.error("Error processing site or mp4 data:", error);
+    });
+
+        });
+
+        // Adjust the chart size when the popup is resized
+        window.addEventListener('resize', () => {
+
+            if (currentChart && currentChart instanceof Chart) {
+                console.log('Resize current chart');
+                currentChart.resize(); // Resize existing chart instance
+            } else {
+                console.log('No current chart to resize or resize is not a function');
+            }
+
+        });
+
+        // Event listeners for dragging the popup
+        var dragTimeout;
+        popupHeader.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            offsetX = e.clientX - customPopup.getBoundingClientRect().left;
+            offsetY = e.clientY - customPopup.getBoundingClientRect().top;
+            
+            // Set timeout to stop dragging after 3 seconds
+            dragTimeout = setTimeout(function() {
+                isDragging = false;
+            }, 3000);
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (isDragging) {
+                customPopup.style.left = `${e.clientX - offsetX}px`;
+                customPopup.style.top = `${e.clientY - offsetY}px`;
+            }
+        });
+
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+        });
+
+
+
+        function showSitePopup(siteId) {
+            sitePopupContent.innerHTML = ''; // Clear previous content
+            const siteInfo = document.createElement('p');
+            siteInfo.id = 'site-info';
+            siteInfo.innerText = `Site ID: ${siteId}`;
+            sitePopupContent.appendChild(siteInfo);
+
+            const methodSelect = document.createElement('select');
+            methodSelect.id = 'interpolation-method';
+            methodSelect.innerHTML = `
+                <option value="movingAverage">Moving Average</option>
+                <option value="linearInterpolation">Linear Interpolation</option>
+                <option value="exponentialSmoothing">Simple Exponential Smoothing</option>
+            `;
+            sitePopupContent.appendChild(methodSelect);
+
+            const applyButton = document.createElement('button');
+            applyButton.className = 'action-button';
+            applyButton.innerHTML = 'Apply Method and Show Graph';
+            applyButton.onclick = function () {
+                const selectedMethod = methodSelect.value;
+                loadAndShowTransectData(siteId, selectedMethod);
+            };
+            sitePopupContent.appendChild(applyButton);
+
+            const chartContainer = document.createElement('div');
+            chartContainer.id = 'site-chart-container';
+            chartContainer.style.width = '100%';
+            chartContainer.style.height = '260px';
+            sitePopupContent.appendChild(chartContainer);
+
+            sitePopup.style.display = 'block';
+        }
+
+        function closeSitePopup() {
+            sitePopup.style.display = 'none';
+        }
+
+        function loadAndShowTransectData(siteId, method) {
+            const chartContainer = document.getElementById('site-chart-container');
+            chartContainer.innerHTML = ''; // Clear previous content
+            const loadingText = document.createElement('p');
+            loadingText.className = 'loading';
+            loadingText.innerText = 'Loading data...';
+            chartContainer.appendChild(loadingText);
+
+            fetch('CoastSat_transect_layer.geojson')
+                .then(response => response.json())
+                .then(transectData => {
+                    const filteredTransects = transectData.features.filter(feature => feature.properties.SiteId === siteId);
+                    if (filteredTransects.length === 0) {
+                        loadingText.innerText = 'No transects found for this site.';
+                        return;
+                    }
+
+                    const transectIds = filteredTransects.map(feature => feature.properties.TransectId);
+                    let allProcessedData = [];
+                    let datasets = [];
+                    let colorIndex = 0;
+
+                    transectIds.forEach((transectId, index) => {
+                        const filePath = `https://erosion-ai.tavenel.fr/aipredictions/project/time-series/${transectId.split('-')[0]}/${transectId}.csv`;
+                        fetch(filePath)
+                            .then(response => response.text())
+                            .then(csvText => {
+                                const parsedData = parseCSV(csvText);
+                                let processedData;
+                                switch (method) {
+                                    case 'movingAverage':
+                                        processedData = calculateMovingAverageForRandomFiles(parsedData, 10);
+                                        break;
+                                    case 'linearInterpolation':
+                                        processedData = performLinearInterpolationForRandomFiles(parsedData);
+                                        break;
+                                    case 'exponentialSmoothing':
+                                        processedData = applyExponentialSmoothingForRandomFiles(parsedData);
+                                        break;
+                                }
+
+                                allProcessedData.push(...processedData);
+                                const color = colors[colorIndex % colors.length];
+                                colorIndex++;
+
+                                const combinedData = processedData.map(d => ({
+                                    x: d.Date,
+                                    y: d.Distance === 'None' ? d.processedValue : parseFloat(d.Distance),
+                                    isPredicted: d.Distance === 'None'
+                                }));
+
+                                datasets.push({
+                                    label: `Transect - ${transectId}`,
+                                    data: combinedData,
+                                    borderColor: color,
+                                    backgroundColor: color,
+                                    fill: false,
+                                    showLine: true,
+                                    pointRadius: 2,
+                                    pointHoverRadius: 5,
+                                    borderDash: []
+                                });
+
+                                if (index === transectIds.length - 1) {
+                                    displayTransectGraph(datasets, chartContainer, method);
+                                    loadingText.remove();
+                                }
+                            })
+                            .catch(error => {
+                                console.error(`Error fetching file: ${filePath}, ${error}`);
+                                loadingText.innerText = 'Error loading transect data.';
+                            });
+                    });
+                })
+                .catch(error => {
+                    console.error(`Error fetching transect data: ${error}`);
+                    loadingText.innerText = 'Error loading transect data.';
+                });
+        }
+
+        function displayTransectGraph(datasets, chartContainer, method) {
+            const ctx = document.createElement('canvas');
+            ctx.id = 'site-chart';
+            chartContainer.appendChild(ctx);
+
+            //if (currentChart) currentChart.destroy();
+            if (currentChart && currentChart instanceof Chart) {
+                console.log('Destroying current chart before creating a new one');
+                currentChart.destroy(); // Destroy existing chart instance
+                currentChart = null; // Clear the current chart reference
+            } else {
+                console.log('No current chart to destroy or destroy is not a function');
+            }
+            currentChart = new Chart(ctx, {
+                type: 'line',
+                data: { datasets },
+                options: {
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: { unit: 'day' },
+                            adapters: { date: luxon.DateTime }
+                        },
+                        y: { beginAtZero: true }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.raw.isPredicted) {
+                                        label += `Predicted Value: ${context.raw.y}`;
+                                    } else {
+                                        label += `Value: ${context.raw.y}`;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function parseCSV(text) {
+            const lines = text.split('\n');
+            const result = [];
+            const headers = lines[0].split(',');
+
+            for (let i = 1; i < lines.length; i++) {
+                const currentline = lines[i].split(',');
+                if (currentline.length === headers.length && currentline.every(cell => cell.trim() !== '')) {
+                    const obj = {};
+                    for (let j = 0; j < headers.length; j++) {
+                        obj[headers[j].trim()] = currentline[j] ? currentline[j].trim() : 'None';
+                    }
+                    result.push(obj);
+                }
+            }
+            return result;
+        }
+
+        const colors = [
+            'rgba(75, 192, 192, 1)', 
+            'rgba(75, 75, 192, 1)', 
+            'rgba(192, 192, 75, 1)', 
+            'rgba(75, 192, 75, 1)', 
+            'rgba(192, 75, 192, 1)', 
+            'rgba(75, 75, 75, 1)', 
+            'rgba(75, 192, 192, 0.7)', 
+            'rgba(192, 192, 192, 1)'
+        ];
+
+        function calculateMovingAverageForRandomFiles(data, windowSize) {
+            return data.map((data, index, array) => {
+                if (data.Distance !== 'None') {
+                    return { ...data, processedValue: parseFloat(data.Distance) };
+                }
+
+                const start = Math.max(index - windowSize, 0);
+                const end = Math.min(index + windowSize, array.length - 1);
+                const window = array.slice(start, end + 1);
+                const validValues = window.map(d => d.Distance).filter(v => v !== 'None').map(v => parseFloat(v));
+                const average = validValues.reduce((sum, v) => sum + v, 0) / validValues.length;
+
+                return { ...data, processedValue: average };
+            });
+        }
+
+        function performLinearInterpolationForRandomFiles(data) {
+            const interpolate = (y0, y1, x0, x1, x) => y0 + ((y1 - y0) * (x - x0)) / (x1 - x0);
+
+            return data.map((data, index, array) => {
+                if (data.Distance !== 'None') return { ...data, processedValue: parseFloat(data.Distance) };
+
+                let prevValues = array.slice(Math.max(0, index - 10), index).filter(d => d.Distance !== 'None');
+                let nextValues = array.slice(index + 1, Math.min(array.length, index + 11)).filter(d => d.Distance !== 'None');
+
+                if (prevValues.length === 0 || nextValues.length === 0) return { ...data, processedValue: null };
+
+                let prev = prevValues[prevValues.length - 1];
+                let next = nextValues[0];
+
+                const interpolatedValue = interpolate(
+                    parseFloat(prev.Distance), 
+                    parseFloat(next.Distance), 
+                    new Date(prev.Date).getTime(), 
+                    new Date(next.Date).getTime(), 
+                    new Date(data.Date).getTime()
+                );
+
+                return { ...data, processedValue: interpolatedValue };
+            });
+        }
+
+        function applyExponentialSmoothingForRandomFiles(data, alpha = 0.2) {
+            let smoothedData = [];
+            let prevValue = null;
+
+            for (let d of data) {
+                if (d.Distance !== 'None') {
+                    prevValue = parseFloat(d.Distance);
+                    smoothedData.push({ ...d, processedValue: prevValue });
+                } else if (prevValue !== null) {
+                    prevValue = alpha * prevValue + (1 - alpha) * (prevValue);
+                    smoothedData.push({ ...d, processedValue: prevValue });
+                } else {
+                    smoothedData.push({ ...d, processedValue: null });
+                }
+            }
+            return smoothedData;
+        }
+
+        function applyForecasting(transectId, chartContainer, type, siteName) {
+            console.log("Sitename");
+            console.log(siteName);
+            const method = document.getElementById('forecast-method').value;
+            const direction = document.getElementById('forecast-direction').value;
+
+            if (method === 'no') {
+                // No forecasting, just load the original chart
+                loadChartWithForecasting(transectId, chartContainer, type, siteName);
+            } else {
+                loadChartWithForecastingAndApply(transectId, chartContainer, method, direction, type, siteName);
+            }
+        }
+
+function loadChartWithForecasting(transectId, chartContainer, type, siteName) {
+    console.log('Loading chart for', transectId, 'with type', type);
+    chartContainer.innerHTML = ''; // Clear previous content
+
+    // Show welcome message
+    showWelcomeMessage(chartContainer, `Show ${type === 'change' ? 'Cross-shore Change' : 'Cross-shore Distance'}`, transectId, siteName);
+
+    // Create back button
+    const buttonBack = document.createElement('button');
+    buttonBack.className = 'back-button'; // Add class for styling
+    buttonBack.innerHTML = 'Back';
+    buttonBack.style.marginRight = '90%';
+    buttonBack.style.marginTop = '2%';
+    buttonBack.style.marginBottom = '-1%';
+    buttonBack.onclick = function () {
+        console.log('Back button clicked');
+        resetButtons(transectId, chartContainer, siteName);
+    };
+    chartContainer.appendChild(buttonBack);
+
+    const forecastContainer = document.createElement('div');
+    const forecastLabel = document.createElement('label');
+    forecastLabel.setAttribute('for', 'forecast-method');
+    forecastLabel.innerText = 'Select Forecasting Method:';
+    forecastContainer.appendChild(forecastLabel);
+
+    const forecastSelect = document.createElement('select');
+    forecastSelect.id = 'forecast-method';
+    forecastSelect.innerHTML = `
+        <option value="no">No Forecasting</option>
+        <option value="naive">Naïve</option>
+        <option value="snaive">SNaïve</option>
+        <option value="seasonaldecomposition">Seasonal Decomposition</option>
+        <option value="statespacemodel">State Space Model</option>
+        <option value="holtWinters">Holt-Winters</option>
+    `;
+    forecastContainer.appendChild(forecastSelect);
+
+    const directionLabel = document.createElement('label');
+    directionLabel.setAttribute('for', 'forecast-direction');
+    directionLabel.innerText = 'Select Prediction Mode:';
+    forecastContainer.appendChild(directionLabel);
+
+    const directionSelect = document.createElement('select');
+    directionSelect.id = 'forecast-direction';
+    directionSelect.innerHTML = `
+        <option value="both">Both</option>
+        <option value="past">Past</option>
+        <option value="future">Future</option>
+    `;
+    forecastContainer.appendChild(directionSelect);
+
+    const applyButton = document.createElement('button');
+    applyButton.innerText = 'Apply Forecasting';
+    applyButton.onclick = function() {
+        applyForecasting(transectId, chartContainer, type, siteName);
+    };
+    forecastContainer.appendChild(applyButton);
+
+    chartContainer.appendChild(forecastContainer);
+
+    const chartDiv = document.createElement('div');
+    chartDiv.id = 'chart-container';
+    chartDiv.style.width = '100%';
+    chartDiv.style.height = '500px'; // Adjusted height for the chart
+    chartContainer.appendChild(chartDiv);
+
+    const filePath = `https://erosion-ai.tavenel.fr/aipredictions/project/time-series/${transectId.split('-')[0]}/${transectId}.csv`;
+
+    fetch(filePath)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Local time series data not found');
+            }
+            return response.text();
+        })
+        .then(csvText => {
+            const rows = csvText.split('\n');
+            const dates = [];
+            const distances = [];
+            rows.forEach((row, index) => {
+                const columns = row.split(',');
+                if (columns.length === 2 && columns[1] !== 'None' && columns[1] !== '') {
+                    dates.push(columns[0]);
+                    distances.push(parseFloat(columns[1]));
+                }
+            });
+
+            const changes = distances.map((distance, index) => {
+                if (index === 0) return 0;
+                return distance - distances[index - 1];
+            });
+
+            const dataToShow = type === 'change' ? changes : distances;
+            const linearTrend = calculateLinearTrend(dataToShow);
+
+            return { transectId, dates, dataToShow, linearTrend, numberOfPoints: distances.length };
+        })
+        .then(chartData => {
+            if (currentChart && currentChart instanceof Chart) {
+                console.log('Destroying current chart before creating a new one');
+                currentChart.destroy(); // Destroy existing chart instance
+                currentChart = null; // Clear the current chart reference
+            } else {
+                console.log('No current chart to destroy or destroy is not a function');
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.id = 'chart';
+            var ctx = canvas.getContext('2d');
+            chartDiv.appendChild(canvas);
+
+            currentChart = createChart(chartData, type, ctx);
+
+            const infoContainer = document.createElement('div');
+            infoContainer.innerHTML = `
+                <p>Number of Data Points: ${chartData.numberOfPoints}</p>
+                <p>Linear Trend: ${chartData.linearTrend.slope.toFixed(2)} (beach slope), ${chartData.linearTrend.intercept.toFixed(2)} (intercept)</p>
+                <p>The beach slope \\(m\\) indicates the rate of change in the shoreline position over time, while the intercept \\(b\\) is the initial position of the shoreline at the start of the measurement.</p>
+                <p>The equation for a line, which represents the linear trend of the shoreline changes, is given by \\( y = mx + b \\), where:</p>
+                <ul>
+                    <li>\\( y \\) is the dependent variable (e.g., Cross-shore Distance or Change)</li>
+                    <li>\\( x \\) is the independent variable (e.g., Time)</li>
+                    <li>\\( m \\) is the beach slope</li>
+                    <li>\\( b \\) is the y-intercept</li>
+                </ul>
+            `;
+            chartDiv.appendChild(infoContainer);
+
+            MathJax.typeset(); // Render the MathJax equations
+        })
+        .catch(error => {
+            console.error(`Error loading chart data: ${error}`);
+            chartDiv.innerHTML = 'Error loading data';
+        });
+}
+
+
+function loadChartWithForecastingAndApply(transectId, chartContainer, method, direction, type, siteName) {
+        const filePath = `https://erosion-ai.tavenel.fr/aipredictions/project/time-series/${transectId.split('-')[0]}/${transectId}.csv`;
+
+        fetch(filePath)
+            .then(response => response.text())
+            .then(csvText => {
+                const rows = csvText.split('\n');
+                const dates = [];
+                const distances = [];
+                rows.forEach(row => {
+                    const columns = row.split(',');
+                    if (columns.length === 2 && columns[1] !== 'None' && columns[1] !== '') {
+                        dates.push(columns[0]);
+                        distances.push(parseFloat(columns[1]));
+                    }
+                });
+
+                const changes = distances.map((distance, index) => {
+                    if (index === 0) return 0;
+                    return distance - distances[index - 1];
+                });
+
+                const dataToShow = type === 'change' ? changes : distances;
+                const forecastedData = applyForecastingMethod(method, dataToShow, dates, direction);
+
+                return { transectId, dates, dataToShow, forecastedDates: forecastedData.dates, forecastedValues: forecastedData.values, numberOfPoints: dataToShow.length };
+            })
+            .then(chartData => {
+                if (currentChart && currentChart instanceof Chart) {
+                    currentChart.destroy(); // Détruire l'instance actuelle du graphique
+                }
+
+                chartContainer.innerHTML = '';
+
+                showWelcomeMessage(chartContainer, `Show ${type === 'change' ? 'Cross-shore Change' : 'Cross-shore Distance'}`, transectId, siteName);
+
+                const buttonBack = document.createElement('button');
+                buttonBack.className = 'back-button'; // Ajouter la classe pour le style
+                buttonBack.innerHTML = 'Back';
+                buttonBack.style.marginRight = '90%';
+                buttonBack.style.marginTop = '2%';
+                buttonBack.style.marginBottom = '-1%';
+                buttonBack.onclick = function () {
+                    resetButtons(transectId, chartContainer, siteName);
+                };
+                chartContainer.appendChild(buttonBack);
+
+                const forecastContainer = document.createElement('div');
+                const forecastLabel = document.createElement('label');
+                forecastLabel.setAttribute('for', 'forecast-method');
+                forecastLabel.innerText = 'Select Forecasting Method:';
+                forecastContainer.appendChild(forecastLabel);
+
+                const forecastSelect = document.createElement('select');
+                forecastSelect.id = 'forecast-method';
+                forecastSelect.innerHTML = `
+                    <option value="no">No Forecasting</option>
+                    <option value="naive">Naïve</option>
+                    <option value="snaive">SNaïve</option>
+                    <option value="seasonaldecomposition">Seasonal Decomposition</option>
+                    <option value="statespacemodel">State Space Model</option>
+                    <option value="holtWinters">Holt-Winters</option>
+                `;
+                forecastContainer.appendChild(forecastSelect);
+
+                const directionLabel = document.createElement('label');
+                directionLabel.setAttribute('for', 'forecast-direction');
+                directionLabel.innerText = 'Select Prediction Mode:';
+                forecastContainer.appendChild(directionLabel);
+
+                const directionSelect = document.createElement('select');
+                directionSelect.id = 'forecast-direction';
+                directionSelect.innerHTML = `
+                    <option value="both">Both</option>
+                    <option value="past">Past</option>
+                    <option value="future">Future</option>
+                `;
+                forecastContainer.appendChild(directionSelect);
+
+                const applyButton = document.createElement('button');
+                applyButton.innerText = 'Apply Forecasting';
+                applyButton.onclick = function() {
+                    applyForecasting(transectId, chartContainer, type, siteName);
+                };
+                forecastContainer.appendChild(applyButton);
+
+                chartContainer.appendChild(forecastContainer);
+
+                const canvas = document.createElement('canvas');
+                canvas.id = 'chart';
+                canvas.style.width = '100%';
+                canvas.style.height = '500px'; // Hauteur ajustée pour le graphique
+                const ctx = canvas.getContext('2d');
+                chartContainer.appendChild(canvas);
+
+                createForecastedChart(chartData, ctx, type);
+
+                const infoContainer = document.createElement('div');
+                infoContainer.innerHTML = `
+                    <p>Number of Data Points: ${chartData.numberOfPoints}</p>
+                    <p>Applied Forecasting Method: ${method}</p>
+                    <p>Prediction Mode: ${direction}</p>
+                `;
+                chartContainer.appendChild(infoContainer);
+            })
+            .catch(error => {
+                console.error(`Error loading chart data: ${error}`);
+                chartContainer.innerHTML = 'Error loading data';
+            });
+    }
+
+
+        function applyForecastingMethod(method, data, dates, direction) {
+            switch (method) {
+                case 'naive':
+                    return naiveForecast(data, dates, direction);
+                case 'snaive':
+                    return snaiveForecast(data, dates, direction);
+                case 'seasonaldecomposition':
+                    return seasonalDecompositionForecast(data, dates, direction);
+                case 'statespacemodel':
+                    return stateSpaceModelForecast(data, dates, direction);
+                case 'holtWinters':
+                    return holtWintersForecast(data, dates, direction);
+                default:
+                    return { dates, values: data };
+            }
+        }
+
+function naiveForecast(data, dates, direction) {
+    const lastValue = data[data.length - 1];
+    const forecastDates = generateFutureDates(new Date(dates[dates.length - 1]), 5); // Forecast for 5 years
+    const forecastedValues = forecastDates.map(() => lastValue);
+
+    const pastDates = generatePastDates(new Date(dates[0]), 5);
+    const pastValues = pastDates.map(() => lastValue);
+
+    if (direction === 'past') {
+        return { dates: pastDates.concat(dates), values: pastValues.concat(data) };
+    } else if (direction === 'future') {
+        return { dates: dates.concat(forecastDates), values: data.concat(forecastedValues) };
+    } else {
+        return { dates: pastDates.concat(dates).concat(forecastDates), values: pastValues.concat(data).concat(forecastedValues) };
+    }
+}
+
+function snaiveForecast(data, dates, direction) {
+    const lastSeason = data.slice(-12); // Assuming monthly data for one year
+    const forecastDates = generateFutureDates(new Date(dates[dates.length - 1]), 5); // Forecast for 5 years
+    const forecastedValues = forecastDates.map((_, index) => lastSeason[index % 12]);
+
+    const pastDates = generatePastDates(new Date(dates[0]), 5);
+    const pastValues = pastDates.map((_, index) => lastSeason[(lastSeason.length - 1 - index) % 12]);
+
+    if (direction === 'past') {
+        return { dates: pastDates.concat(dates), values: pastValues.concat(data) };
+    } else if (direction === 'future') {
+        return { dates: dates.concat(forecastDates), values: data.concat(forecastedValues) };
+    } else {
+        return { dates: pastDates.concat(dates).concat(forecastDates), values: pastValues.concat(data).concat(forecastedValues) };
+    }
+}
+
+function seasonalDecompositionForecast(data, dates, direction) {
+    const period = 12; // Assuming monthly data with yearly seasonality
+    const trend = [];
+    const seasonal = [];
+    const residual = [];
+    const values = data.map((v, i) => ({ x: new Date(dates[i]), y: v }));
+
+    // Calculate trend component using moving average
+    const movingAvg = (arr, windowPeriod) => {
+        let result = [];
+        for (let i = 0; i < arr.length; i++) {
+            if (i < windowPeriod - 1) {
+                result.push(null);
+            } else {
+                let sum = 0;
+                for (let j = i - windowPeriod + 1; j <= i; j++) {
+                    sum += arr[j].y;
+                }
+                result.push(sum / windowPeriod);
+            }
+        }
+        return result;
+    };
+
+    const trendComponent = movingAvg(values, period);
+    trendComponent.forEach((v, i) => trend.push(v));
+
+    // Calculate seasonal component
+    const seasonalComponent = new Array(period).fill(0);
+    for (let i = 0; i < period; i++) {
+        let sum = 0;
+        let count = 0;
+        for (let j = i; j < values.length; j += period) {
+            if (values[j].y !== null && trend[j] !== null) {
+                sum += values[j].y - trend[j];
+                count++;
+            }
+        }
+        seasonalComponent[i] = sum / count;
+    }
+
+    for (let i = 0; i < values.length; i++) {
+        seasonal.push(seasonalComponent[i % period]);
+        residual.push(values[i].y - trend[i] - seasonalComponent[i % period]);
+    }
+
+    // Generate forecasted values
+    const forecastValues = (component, length) => {
+        const result = [];
+        for (let i = 0; i < length; i++) {
+            result.push(component[i % component.length]);
+        }
+        return result;
+    };
+
+    const forecastDates = generateFutureDates(new Date(dates[dates.length - 1]), 5); // Forecast for 5 years
+    const futureTrend = forecastValues(trend, forecastDates.length);
+    const futureSeasonal = forecastValues(seasonalComponent, forecastDates.length);
+    const futureForecast = futureTrend.map((v, i) => v + futureSeasonal[i]);
+
+    const pastDates = generatePastDates(new Date(dates[0]), 5);
+    const pastTrend = forecastValues(trend, pastDates.length);
+    const pastSeasonal = forecastValues(seasonalComponent, pastDates.length);
+    const pastForecast = pastTrend.map((v, i) => v + pastSeasonal[i]);
+
+    if (direction === 'past') {
+        return { dates: pastDates.concat(dates), values: pastForecast.concat(data) };
+    } else if (direction === 'future') {
+        return { dates: dates.concat(forecastDates), values: data.concat(futureForecast) };
+    } else {
+        return { dates: pastDates.concat(dates).concat(forecastDates), values: pastForecast.concat(data).concat(futureForecast) };
+    }
+}
+
+function stateSpaceModelForecast(data, dates, direction) {
+    const alpha = 0.5; // Observation noise coefficient
+    const beta = 0.5; // State noise coefficient
+    let stateEstimate = data[0]; // Initial state estimate
+
+    const smoothedData = data.map((d, i) => {
+        stateEstimate = alpha * d + (1 - alpha) * stateEstimate; // Update state estimate with observation
+        return stateEstimate;
+    });
+
+    const forecastValues = (length, state) => {
+        const result = [];
+        for (let i = 0; i < length; i++) {
+            state = beta * state; // Predict next state
+            result.push(state);
+        }
+        return result;
+    };
+
+    const forecastDates = generateFutureDates(new Date(dates[dates.length - 1]), 5); // Forecast for 5 years
+    const futureForecast = forecastValues(forecastDates.length, stateEstimate);
+
+    const pastDates = generatePastDates(new Date(dates[0]), 5);
+    const pastForecast = forecastValues(pastDates.length, stateEstimate).reverse();
+
+    if (direction === 'past') {
+        return { dates: pastDates.concat(dates), values: pastForecast.concat(data) };
+    } else if (direction === 'future') {
+        return { dates: dates.concat(forecastDates), values: data.concat(futureForecast) };
+    } else {
+        return { dates: pastDates.concat(dates).concat(forecastDates), values: pastForecast.concat(data).concat(futureForecast) };
+    }
+}
+
+function holtWintersForecast(data, dates, direction) {
+    const alpha = 0.2; // Level smoothing parameter
+    const beta = 0.1;  // Trend smoothing parameter
+    const gamma = 0.3; // Seasonal smoothing parameter
+    const period = 12; // Seasonal period (assuming monthly data with yearly seasonality)
+
+    let level, trend;
+    let seasonal = [];
+    let seasonals = new Array(period).fill(0);
+
+    // Initialize level, trend, and seasonal components
+    level = data[0];
+    trend = data[1] - data[0];
+    for (let i = 0; i < period; i++) {
+        seasonals[i] = data[i] - level;
+    }
+
+    const smoothedData = data.map((value, index) => {
+        const lastLevel = level;
+        const lastTrend = trend;
+        const seasonalComponent = seasonals[index % period];
+
+        level = alpha * (value - seasonalComponent) + (1 - alpha) * (lastLevel + lastTrend);
+        trend = beta * (level - lastLevel) + (1 - beta) * lastTrend;
+        seasonals[index % period] = gamma * (value - level) + (1 - gamma) * seasonalComponent;
+
+        return level + trend + seasonals[index % period];
+    });
+
+    const forecastValues = (length, level, trend, seasonals) => {
+        const result = [];
+        for (let i = 0; i < length; i++) {
+            level += trend;
+            result.push(level + seasonals[i % period]);
+        }
+        return result;
+    };
+
+    const forecastDates = generateFutureDates(new Date(dates[dates.length - 1]), 5); // Forecast for 5 years
+    const futureForecast = forecastValues(forecastDates.length, level, trend, seasonals);
+
+    const pastDates = generatePastDates(new Date(dates[0]), 5);
+    const pastForecast = forecastValues(pastDates.length, level, trend, seasonals).reverse();
+
+    if (direction === 'past') {
+        return { dates: pastDates.concat(dates), values: pastForecast.concat(data) };
+    } else if (direction === 'future') {
+        return { dates: dates.concat(forecastDates), values: data.concat(futureForecast) };
+    } else {
+        return { dates: pastDates.concat(dates).concat(forecastDates), values: pastForecast.concat(data).concat(futureForecast) };
+    }
+}
+
+function generateFutureDates(lastDate, years) {
+    const dates = [];
+    let currentDate = new Date(lastDate);
+    for (let i = 0; i < years * 12; i++) {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        dates.push(new Date(currentDate));
+    }
+    return dates;
+}
+
+function generatePastDates(firstDate, years) {
+    const dates = [];
+    let currentDate = new Date(firstDate);
+    for (let i = 0; i < years * 12; i++) {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        dates.push(new Date(currentDate));
+    }
+    return dates.reverse();
+}
+
+
+function createForecastedChart(chartData, ctx,type) {
+    const existingData = chartData.dates.map((date, index) => ({
+        x: date,
+        y: chartData.dataToShow[index]
+    }));
+
+    const forecastedData = chartData.forecastedDates.map((date, index) => ({
+        x: date,
+        y: chartData.forecastedValues[index]
+    }));
+
+    currentChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            datasets: [
+                {
+                    label: 'Existing Data',
+                    data: existingData,
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    fill: false
+                },
+                {
+                    label: 'Forecasted Data',
+                    data: forecastedData,
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    fill: false,
+                    borderDash: [5, 5]
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit: 'month',
+                        tooltipFormat: 'yyyy-MM-dd',
+                        displayFormats: {
+                            month: 'MMM yyyy'
+                        }
+                    },
+                    display: true,
+                    title: {
+                        display: true,
+                        text: 'Date'
+                    },
+                },
+                y: {
+                    beginAtZero: true,
+                    display: true,
+                    title: {
+                        display: true,
+                        text: type === 'change' ? 'Cross-shore Change (m)' : 'Cross-shore Distance (m)'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function showWelcomeMessage(container, message, transectId, siteName) {
+    const welcomeMessage = document.createElement('div');
+    welcomeMessage.className = 'welcome-message';
+    welcomeMessage.innerHTML = `
+        <h2>Welcome to ${message}</h2>
+        <p>You are viewing <strong>${message}</strong> for Transect ID: <strong>${transectId}</strong> in Site: <strong>${siteName}</strong>.</p>
+    `;
+    container.appendChild(welcomeMessage);
+}
+
+
+    </script>
+</body>
+</html>
